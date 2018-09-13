@@ -6,7 +6,8 @@ from utils import range_grid
 if __name__ == '__main__':
     # MSU
     lmsu = LomonosovMSU(username=passwords.auth_login, password=passwords.auth_pswd)
-    data = lmsu.scrap_by_csv_with_users('users.csv')
+    data = lmsu.scrap_data('users.csv')
+    data = lmsu.scrap_achievements(data)
 
     # Google table
     worksheet = GSpread('key.json').get_worksheet()
