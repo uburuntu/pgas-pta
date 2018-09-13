@@ -1,0 +1,4 @@
+beautifulsoup4
+grab
+gspread
+oauth2client
