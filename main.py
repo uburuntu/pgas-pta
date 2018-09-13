@@ -1,11 +1,13 @@
+import passwords
 from gspread_handle import GSpread
+from lmsu_handle import LomonosovMSU
 from utils import range_grid
 
 if __name__ == '__main__':
     # MSU
-    # lmsu = LomonosovMSU(username=passwords.auth_login, password=passwords.auth_pswd)
-    # data = lmsu.scrap_data('users.csv')
-    # data = lmsu.scrap_achievements(data)
+    lmsu = LomonosovMSU(username=passwords.auth_login, password=passwords.auth_pswd)
+    data = lmsu.scrap_data('users.csv')
+    data = lmsu.scrap_achievements(data)
 
     # Google table
     worksheet = GSpread('key.json').get_worksheet()
@@ -25,5 +27,5 @@ if __name__ == '__main__':
         cells[1].value = user['name']
         cells[2].value = 'хз'
         cells[3].value = sum([int(x['score']) for x in user['achievements']])
-        cells[4].value = f'http://lomonosov-msu.ru/rus/user/profile/{user_id}'
+        cells[4].value = f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list'
         worksheet.update_cells(cells)
