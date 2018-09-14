@@ -4,11 +4,15 @@ from lmsu_handle import LomonosovMSU
 from utils import print_section, print_subsection, range_grid
 
 if __name__ == '__main__':
+    # Script arguments
+    lmsu_data_from_file = True
+    users_filename = 'users.csv'
+    google_key_filename = 'key.json'
+
     # MSU
     lmsu = LomonosovMSU()
-    data_from_file = False
 
-    if data_from_file:
+    if lmsu_data_from_file:
         print_section('Loading data from file')
         lmsu.load()
     else:
@@ -16,7 +20,7 @@ if __name__ == '__main__':
         lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
 
         print_section('Collecting users info')
-        lmsu.scrap_data('users.csv')
+        lmsu.scrap_data(users_filename)
 
         print_section(f'Collecting {len(lmsu.data)} user(s) achievements')
         lmsu.scrap_achievements()
@@ -29,7 +33,7 @@ if __name__ == '__main__':
 
     # Google table
     print_section('Connecting to Google Spreadsheets')
-    worksheet = GSpread('key.json').get_worksheet()
+    worksheet = GSpread(google_key_filename).get_worksheet()
 
     # Fill sheet
     print_section('Filling worksheet with our data')
