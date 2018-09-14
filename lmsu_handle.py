@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from grab import Grab
 
-from utils import csv_to_list
+from utils import csv_to_list, print_subsection
 
 
 class LomonosovMSU:
@@ -22,6 +22,7 @@ class LomonosovMSU:
             soup = BeautifulSoup(self.grab.doc.body, features="lxml")
             data[user_id] = {'name': soup.find('h3', {'class': 'achievements-user__name'}).text.strip(),
                              'achievements': []}
+            print_subsection(f'Processing data for {user_id} — {data[user_id]["name"]}')
             for achievement in soup.find_all("article", {"class": "achievement"}):
                 if achievement.find("input", {"checked": "checked"}):
                     curr_data = {
@@ -35,6 +36,8 @@ class LomonosovMSU:
 
     def scrap_achievements(self, data):
         for user_id, user in data.items():
+            print_subsection(f'Processing {len(user["achievements"]):>2} achievement(s) for {user_id}'
+                             f' — {data[user_id]["name"]}')
             for achievement in user['achievements']:
                 self.grab.go(achievement['url'])
                 soup = BeautifulSoup(self.grab.doc.body, features="lxml")
