@@ -108,3 +108,6 @@ venv.bak/
 
 # Keys
 key.json
+
+# Dumps
+data_dump.json

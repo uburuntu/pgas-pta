@@ -5,14 +5,27 @@ from utils import print_section, print_subsection, range_grid
 
 if __name__ == '__main__':
     # MSU
-    print_section('Connecting to Lomonosov network')
-    lmsu = LomonosovMSU(username=passwords.auth_login, password=passwords.auth_pswd)
-    print_section('Collecting users info')
-    data = lmsu.scrap_data('users.csv')
-    print_section(f'Collecting {len(data)} user(s) achievements')
-    lmsu.scrap_achievements(data)
-    print_section(f'Filtering {len(data)} user(s)')
-    lmsu.filter_users(data)
+    lmsu = LomonosovMSU()
+    data_from_file = False
+
+    if data_from_file:
+        print_section('Loading data from file')
+        lmsu.load()
+    else:
+        print_section('Connecting to Lomonosov network')
+        lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
+
+        print_section('Collecting users info')
+        lmsu.scrap_data('users.csv')
+
+        print_section(f'Collecting {len(lmsu.data)} user(s) achievements')
+        lmsu.scrap_achievements()
+
+    print_section(f'Filtering {len(lmsu.data)} user(s)')
+    lmsu.filter_users()
+
+    # Dump users data
+    lmsu.dump()
 
     # Google table
     print_section('Connecting to Google Spreadsheets')
@@ -29,7 +42,7 @@ if __name__ == '__main__':
     cells[4].value = 'URL'
     worksheet.update_cells(cells)
 
-    for i, (user_id, user) in enumerate(data.items(), start=2):
+    for i, (user_id, user) in enumerate(lmsu.data.items(), start=2):
         print_subsection(f'Filling user {user_id} data — {user["name"]}')
         cells = worksheet.range(range_grid((i, 1), (i, 5)))
         cells[0].value = user_id

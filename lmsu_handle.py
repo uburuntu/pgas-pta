@@ -1,3 +1,5 @@
+import json
+
 from bs4 import BeautifulSoup
 from datetime import datetime
 from grab import Grab
@@ -8,18 +10,27 @@ from utils import csv_to_list, print_subsection
 class LomonosovMSU:
     achievements_fire_day = datetime(2017, 9, 14)
 
-    def __init__(self, username, password):
-        self.grab = Grab()
-        self.authorization_on_msu(username, password)
+    def __init__(self):
+        self.data = {}
+        self.grab = None
+
+    def load(self, filename='data_dump.json'):
+        with open(filename, 'r', encoding='utf-8') as file:
+            self.data = json.load(file)
+
+    def dump(self, filename='data_dump.json'):
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(self.data, file, indent=True, ensure_ascii=False)
 
     def authorization_on_msu(self, username, password):
+        self.grab = Grab()
         self.grab.go('http://lomonosov-msu.ru/rus/login')
         self.grab.doc.set_input('_username', username)
         self.grab.doc.set_input('_password', password)
         self.grab.submit()
 
     def scrap_data(self, users_file_name):
-        data = {}
+        data = self.data
         for user_id in csv_to_list(users_file_name):
             self.grab.go(f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list')
             soup = BeautifulSoup(self.grab.doc.body, features="lxml")
@@ -35,9 +46,9 @@ class LomonosovMSU:
                         'url': 'http://lomonosov-msu.ru' + achievement.find("a", {"class": "achievement__link"})['href']
                     }
                     data[user_id]['achievements'].append(curr_data)
-        return data
 
-    def scrap_achievements(self, data):
+    def scrap_achievements(self):
+        data = self.data
         for user_id, user in data.items():
             print_subsection(f'Processing {len(user["achievements"]):>2} achievement(s) for {user_id} '
                              f'— {data[user_id]["name"]}')
@@ -49,7 +60,8 @@ class LomonosovMSU:
                         achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
                         break
 
-    def filter_users(self, data):
+    def filter_users(self):
+        data = self.data
         for user_id, user in data.items():
             achievements = user['achievements']
             for achievement in achievements[:]:
