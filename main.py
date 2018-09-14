@@ -5,7 +5,7 @@ from utils import print_section, print_subsection, range_grid
 
 if __name__ == '__main__':
     # Script arguments
-    lmsu_data_from_file = True
+    lmsu_data_from_file = False
     users_filename = 'users.csv'
     google_key_filename = 'key.json'
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     print_section(f'Filtering {len(lmsu.data)} user(s)')
     lmsu.filter_users()
 
-    # Dump users data
+    print_section(f'Dumping users data to file')
     lmsu.dump()
 
     # Google table

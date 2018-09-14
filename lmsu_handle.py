@@ -8,6 +8,7 @@ from utils import csv_to_list, print_subsection
 
 
 class LomonosovMSU:
+    lmsu_url = 'https://lomonosov-msu.ru'
     achievements_fire_day = datetime(2017, 9, 14)
 
     def __init__(self):
@@ -24,7 +25,7 @@ class LomonosovMSU:
 
     def authorization_on_msu(self, username, password):
         self.grab = Grab()
-        self.grab.go('http://lomonosov-msu.ru/rus/login')
+        self.grab.go(self.lmsu_url + '/rus/login')
         self.grab.doc.set_input('_username', username)
         self.grab.doc.set_input('_password', password)
         self.grab.submit()
@@ -32,7 +33,7 @@ class LomonosovMSU:
     def scrap_data(self, users_file_name):
         data = self.data
         for user_id in csv_to_list(users_file_name):
-            self.grab.go(f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list')
+            self.grab.go(f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list')
             soup = BeautifulSoup(self.grab.doc.body, features="lxml")
             data[user_id] = {'name': soup.find('h3', {'class': 'achievements-user__name'}).text.strip(),
                              'achievements': []}
@@ -43,7 +44,7 @@ class LomonosovMSU:
                         'title': achievement.find("a", {"class": "achievement__link"}).text.strip(),
                         'info': achievement.find("p", {"class": "achievement__more"}).text.strip(),
                         'score': achievement.find("span", {"class": "ach-pill"}).text,
-                        'url': 'http://lomonosov-msu.ru' + achievement.find("a", {"class": "achievement__link"})['href']
+                        'url': self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href']
                     }
                     data[user_id]['achievements'].append(curr_data)
 
@@ -58,7 +59,9 @@ class LomonosovMSU:
                 for row in soup.find_all("div", {"class": "request__row"}):
                     if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                         achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
-                        break
+                file = soup.find("a", {"class": "file-list__file-name"})
+                if file:
+                    achievement['file'] = self.lmsu_url + file.attrs['href']
 
     def filter_users(self):
         data = self.data
