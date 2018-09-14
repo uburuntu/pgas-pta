@@ -42,7 +42,7 @@ class LomonosovMSU:
                 if achievement.find("input", {"checked": "checked"}):
                     curr_data = {
                         'title': achievement.find("a", {"class": "achievement__link"}).text.strip(),
-                        'info': achievement.find("p", {"class": "achievement__more"}).text.strip(),
+                        'category': achievement.find("p", {"class": "achievement__more"}).text.strip(),
                         'score': achievement.find("span", {"class": "ach-pill"}).text,
                         'url': self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href']
                     }
