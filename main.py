@@ -4,12 +4,16 @@ from lmsu_handle import LomonosovMSU
 from utils import print_section, print_subsection, range_grid
 
 if __name__ == '__main__':
+    #
     # Script arguments
+    #
     lmsu_data_from_file = True
     users_filename = 'users.csv'
     google_key_filename = 'key.json'
 
+    #
     # MSU
+    #
     lmsu = LomonosovMSU()
 
     if lmsu_data_from_file:
@@ -31,11 +35,15 @@ if __name__ == '__main__':
     print_section(f'Dumping users data to file')
     lmsu.dump()
 
+    #
     # Google table
+    #
     print_section('Connecting to Google Spreadsheets')
     gspread = GSpread(google_key_filename)
 
+    #
     # Fill main sheet
+    #
     worksheet = gspread.get_main_worksheet()
 
     print_section('Filling main worksheet with our data')
@@ -58,7 +66,9 @@ if __name__ == '__main__':
         cells[4].value = f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list'
         worksheet.update_cells(cells)
 
+    #
     # Fill achievements sheet
+    #
     worksheet = gspread.get_achievements_worksheet()
 
     print_section('Filling achievements with our data')
