@@ -73,5 +73,7 @@ class LomonosovMSU:
                     print_subsection(f'Excluding user ({user_id} — {data[user_id]["name"]}) achievement cause of date: '
                                      f'{achievement["date"]} ({achievement["url"]})')
                     achievements.remove(achievement)
-            # Left only 2 max achievements
-            user['achievements'] = sorted(achievements, reverse=True, key=lambda x: int(x['score']))[:2]
+
+            if False:
+                # Left only 2 max achievements
+                user['achievements'] = sorted(achievements, reverse=True, key=lambda x: int(x['score']))[:2]
