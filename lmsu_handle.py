@@ -67,8 +67,11 @@ class LomonosovMSU:
         data = self.data
         for user_id, user in data.items():
             achievements = user['achievements']
+            # Remove outdated achievements
             for achievement in achievements[:]:
                 if datetime.strptime(achievement['date'], '%d.%m.%Y') < self.achievements_fire_day:
                     print_subsection(f'Excluding user ({user_id} — {data[user_id]["name"]}) achievement cause of date: '
                                      f'{achievement["date"]} ({achievement["url"]})')
                     achievements.remove(achievement)
+            # Left only 2 max achievements
+            user['achievements'] = sorted(achievements, reverse=True, key=lambda x: int(x['score']))[:2]
