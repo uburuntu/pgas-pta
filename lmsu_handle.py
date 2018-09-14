@@ -38,8 +38,7 @@ class LomonosovMSU:
             for achievement in user['achievements']:
                 self.grab.go(achievement['url'])
                 soup = BeautifulSoup(self.grab.doc.body, features="lxml")
-                soup.find('h3', {'class': 'request__row-info'}).text.strip()
-                for row in soup.find_all("request__row"):
-                    if row.find("request__row-title").text.strip() == 'Дата получения':
-                        achievement['date'] = row.find("request__row-info").text.strip()
+                for row in soup.find_all("div", {"class": "request__row"}):
+                    if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
+                        achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
         return data
