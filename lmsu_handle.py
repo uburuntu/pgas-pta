@@ -1,10 +1,13 @@
 from bs4 import BeautifulSoup
+from datetime import datetime
 from grab import Grab
 
 from utils import csv_to_list, print_subsection
 
 
 class LomonosovMSU:
+    achievements_fire_day = datetime(2017, 9, 14)
+
     def __init__(self, username, password):
         self.grab = Grab()
         self.authorization_on_msu(username, password)
@@ -36,12 +39,21 @@ class LomonosovMSU:
 
     def scrap_achievements(self, data):
         for user_id, user in data.items():
-            print_subsection(f'Processing {len(user["achievements"]):>2} achievement(s) for {user_id}'
-                             f' — {data[user_id]["name"]}')
+            print_subsection(f'Processing {len(user["achievements"]):>2} achievement(s) for {user_id} '
+                             f'— {data[user_id]["name"]}')
             for achievement in user['achievements']:
                 self.grab.go(achievement['url'])
                 soup = BeautifulSoup(self.grab.doc.body, features="lxml")
                 for row in soup.find_all("div", {"class": "request__row"}):
                     if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                         achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
-        return data
+                        break
+
+    def filter_users(self, data):
+        for user_id, user in data.items():
+            achievements = user['achievements']
+            for achievement in achievements[:]:
+                if datetime.strptime(achievement['date'], '%d.%m.%Y') < self.achievements_fire_day:
+                    print_subsection(f'Excluding user ({user_id} — {data[user_id]["name"]}) achievement cause of date: '
+                                     f'{achievement["date"]} ({achievement["url"]})')
+                    achievements.remove(achievement)

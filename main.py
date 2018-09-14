@@ -10,7 +10,9 @@ if __name__ == '__main__':
     print_section('Collecting users info')
     data = lmsu.scrap_data('users.csv')
     print_section(f'Collecting {len(data)} user(s) achievements')
-    data = lmsu.scrap_achievements(data)
+    lmsu.scrap_achievements(data)
+    print_section(f'Filtering {len(data)} user(s)')
+    lmsu.filter_users(data)
 
     # Google table
     print_section('Connecting to Google Spreadsheets')
