@@ -1,7 +1,7 @@
 import json
+from datetime import datetime
 
 from bs4 import BeautifulSoup
-from datetime import datetime
 from grab import Grab
 
 from utils import csv_to_list, print_subsection
@@ -35,16 +35,16 @@ class LomonosovMSU:
         for user_id in csv_to_list(users_file_name):
             self.grab.go(f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list')
             soup = BeautifulSoup(self.grab.doc.body, features="lxml")
-            data[user_id] = {'name': soup.find('h3', {'class': 'achievements-user__name'}).text.strip(),
+            data[user_id] = {'name'        : soup.find('h3', {'class': 'achievements-user__name'}).text.strip(),
                              'achievements': []}
             print_subsection(f'Processing data for {user_id} — {data[user_id]["name"]}')
             for achievement in soup.find_all("article", {"class": "achievement"}):
                 if achievement.find("input", {"checked": "checked"}):
                     curr_data = {
-                        'title': achievement.find("a", {"class": "achievement__link"}).text.strip(),
+                        'title'   : achievement.find("a", {"class": "achievement__link"}).text.strip(),
                         'category': achievement.find("p", {"class": "achievement__more"}).text.strip(),
-                        'score': achievement.find("span", {"class": "ach-pill"}).text,
-                        'url': self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href']
+                        'score'   : achievement.find("span", {"class": "ach-pill"}).text,
+                        'url'     : self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href']
                     }
                     data[user_id]['achievements'].append(curr_data)
 

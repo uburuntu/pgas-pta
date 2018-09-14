@@ -1,17 +1,11 @@
 import csv
 
-
-def column_name(column):
-    string = ''
-    while column > 0:
-        column, remainder = divmod(column - 1, 26)
-        string = chr(65 + remainder) + string
-    return string
+from gspread.utils import rowcol_to_a1
 
 
 def range_grid(cell_start, cell_end):
     ''' range_grid((1,1),(3,3)) = A1:C3 '''
-    return f'{column_name(cell_start[1])}{cell_start[0]}:{column_name(cell_end[1])}{cell_end[0]}'
+    return f'{rowcol_to_a1(*cell_start)}:{rowcol_to_a1(*cell_end)}'
 
 
 def csv_to_list(file_name):

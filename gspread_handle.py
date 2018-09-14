@@ -22,8 +22,8 @@ class GSpread:
 
     def get_spreadsheet(self):
         if not self.spreadsheet:
-            self.spreadsheet =  self.gs.open_by_url('https://docs.google.com/spreadsheets/d/'
-                                                    '1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc')
+            self.spreadsheet = self.gs.open_by_url('https://docs.google.com/spreadsheets/d/'
+                                                   '1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc')
         return self.spreadsheet
 
     def share_access(self, email, role='writer'):
