@@ -26,11 +26,14 @@ class GSpread:
                                                     '1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc')
         return self.spreadsheet
 
+    def share_access(self, email, role='writer'):
+        self.get_spreadsheet().share(email, perm_type='user', role=role)
+
     def get_sheet(self, title):
         try:
             sheet = self.get_spreadsheet().worksheet(title)
         except WorksheetNotFound:
-            sheet = self.get_spreadsheet().add_worksheet('Общий список', 5000, 26)
+            sheet = self.get_spreadsheet().add_worksheet(title, 5000, 26)
         return sheet
 
     def get_main_worksheet(self):

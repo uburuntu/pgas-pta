@@ -1,10 +1,6 @@
 import csv
 
 
-def share_access(spreadsheet, email, role='writer'):
-    spreadsheet.share(email, perm_type='user', role=role)
-
-
 def column_name(column):
     string = ''
     while column > 0:
