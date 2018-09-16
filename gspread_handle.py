@@ -57,17 +57,20 @@ class GSpread:
         cells[2].value = 'Номер группы'
         cells[3].value = 'Баллы'
         cells[4].value = 'URL'
-        worksheet.update_cells(cells)
 
-        for i, (user_id, user) in enumerate(data.items(), start=2):
+        curr_line = 2
+        for user_id, user in data.items():
             print_subsection(f'Filling user {user_id} data — {user["name"]}')
-            cells = worksheet.range(range_grid((i, 1), (i, 5)))
+            cells = worksheet.range(range_grid((curr_line, 1), (curr_line, 5)))
             cells[0].value = user_id
             cells[1].value = user['name']
             cells[2].value = 'хз'
             cells[3].value = sum([int(x['score']) for x in user['achievements']])
             cells[4].value = f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list'
-            worksheet.update_cells(cells)
+            curr_line += 1
+
+        cells = worksheet.range(range_grid((1, 1), (curr_line, 8)))
+        worksheet.update_cells(cells)
 
     def fill_achievements_worksheet(self, data):
         worksheet = self.get_achievements_worksheet()
@@ -81,7 +84,6 @@ class GSpread:
         cells[5].value = 'Балл'
         cells[6].value = 'URL достижения'
         cells[7].value = 'URL подтверждения'
-        worksheet.update_cells(cells)
 
         curr_line = 2
         for user_id, user in data.items():
@@ -96,5 +98,7 @@ class GSpread:
                 cells[5].value = achievement['score']
                 cells[6].value = achievement['url']
                 cells[7].value = achievement['file']
-                worksheet.update_cells(cells)
                 curr_line += 1
+
+        cells = worksheet.range(range_grid((1, 1), (curr_line, 8)))
+        worksheet.update_cells(cells)
