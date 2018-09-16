@@ -50,55 +50,63 @@ class GSpread:
 
     def fill_main_worksheet(self, data):
         worksheet = self.get_main_worksheet()
-        print_subsection('Filling header')
-        cells = worksheet.range(range_grid((1, 1), (1, 5)))
-        cells[0].value = 'ID'
-        cells[1].value = 'ФИО'
-        cells[2].value = 'Номер группы'
-        cells[3].value = 'Баллы'
-        cells[4].value = 'URL'
 
-        curr_line = 2
+        row_n, col_n = len(data) + 1, 5
+        curr_row = 1
+        cells = worksheet.range(range_grid((curr_row, 1), (row_n, col_n)))
+
+        print_subsection('Filling header')
+        row = cells[(curr_row - 1) * col_n:]
+        row[0].value = 'ID'
+        row[1].value = 'ФИО'
+        row[2].value = 'Номер группы'
+        row[3].value = 'Баллы'
+        row[4].value = 'URL'
+        curr_row += 1
+
         for user_id, user in data.items():
             print_subsection(f'Filling user {user_id} data — {user["name"]}')
-            cells = worksheet.range(range_grid((curr_line, 1), (curr_line, 5)))
-            cells[0].value = user_id
-            cells[1].value = user['name']
-            cells[2].value = 'хз'
-            cells[3].value = sum([int(x['score']) for x in user['achievements']])
-            cells[4].value = f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list'
-            curr_line += 1
+            row = cells[(curr_row - 1) * col_n:]
+            row[0].value = user_id
+            row[1].value = user['name']
+            row[2].value = 'хз'
+            row[3].value = sum([int(x['score']) for x in user['achievements']])
+            row[4].value = f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list'
+            curr_row += 1
 
-        cells = worksheet.range(range_grid((1, 1), (curr_line, 8)))
         worksheet.update_cells(cells)
 
     def fill_achievements_worksheet(self, data):
         worksheet = self.get_achievements_worksheet()
-        print_subsection('Filling header')
-        cells = worksheet.range(range_grid((1, 1), (1, 8)))
-        cells[0].value = 'ID'
-        cells[1].value = 'ФИО'
-        cells[2].value = 'Название'
-        cells[3].value = 'Категория'
-        cells[4].value = 'Дата получения'
-        cells[5].value = 'Балл'
-        cells[6].value = 'URL достижения'
-        cells[7].value = 'URL подтверждения'
 
-        curr_line = 2
+        row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, 8
+        curr_row = 1
+        cells = worksheet.range(range_grid((curr_row, 1), (row_n, col_n)))
+
+        print_subsection('Filling header')
+        row = cells[(curr_row - 1) * col_n:]
+        row[0].value = 'ID'
+        row[1].value = 'ФИО'
+        row[2].value = 'Название'
+        row[3].value = 'Категория'
+        row[4].value = 'Дата получения'
+        row[5].value = 'Балл'
+        row[6].value = 'URL достижения'
+        row[7].value = 'URL подтверждения'
+        curr_row += 1
+
         for user_id, user in data.items():
             print_subsection(f'Filling user {user_id} achievements — {user["name"]}')
             for achievement in user['achievements']:
-                cells = worksheet.range(range_grid((curr_line, 1), (curr_line, 8)))
-                cells[0].value = user_id
-                cells[1].value = user['name']
-                cells[2].value = achievement['title']
-                cells[3].value = achievement['category']
-                cells[4].value = achievement['date']
-                cells[5].value = achievement['score']
-                cells[6].value = achievement['url']
-                cells[7].value = achievement['file']
-                curr_line += 1
+                row = cells[(curr_row - 1) * col_n:]
+                row[0].value = user_id
+                row[1].value = user['name']
+                row[2].value = achievement['title']
+                row[3].value = achievement['category']
+                row[4].value = achievement['date']
+                row[5].value = achievement['score']
+                row[6].value = achievement['url']
+                row[7].value = achievement['file']
+                curr_row += 1
 
-        cells = worksheet.range(range_grid((1, 1), (curr_line, 8)))
         worksheet.update_cells(cells)
