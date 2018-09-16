@@ -35,7 +35,7 @@ class GSpread:
         try:
             sheet = self.get_spreadsheet().worksheet(title)
         except WorksheetNotFound:
-            sheet = self.get_spreadsheet().add_worksheet(title, 5000, 26)
+            sheet = self.get_spreadsheet().add_worksheet(title, 2000, 26)
         return sheet
 
     def get_main_worksheet(self):
@@ -55,7 +55,6 @@ class GSpread:
         curr_row = 1
         cells = worksheet.range(range_grid((curr_row, 1), (row_n, col_n)))
 
-        print_subsection('Filling header')
         row = cells[(curr_row - 1) * col_n:]
         row[0].value = 'ID'
         row[1].value = 'ФИО'
@@ -65,13 +64,12 @@ class GSpread:
         curr_row += 1
 
         for user_id, user in data.items():
-            print_subsection(f'Filling user {user_id} data — {user["name"]}')
             row = cells[(curr_row - 1) * col_n:]
             row[0].value = user_id
             row[1].value = user['name']
             row[2].value = 'хз'
             row[3].value = sum([int(x['score']) for x in user['achievements']])
-            row[4].value = f'http://lomonosov-msu.ru/rus/user/achievement/user/{user_id}/list'
+            row[4].value = user['url']
             curr_row += 1
 
         worksheet.update_cells(cells)
@@ -83,7 +81,6 @@ class GSpread:
         curr_row = 1
         cells = worksheet.range(range_grid((curr_row, 1), (row_n, col_n)))
 
-        print_subsection('Filling header')
         row = cells[(curr_row - 1) * col_n:]
         row[0].value = 'ID'
         row[1].value = 'ФИО'
@@ -96,7 +93,6 @@ class GSpread:
         curr_row += 1
 
         for user_id, user in data.items():
-            print_subsection(f'Filling user {user_id} achievements — {user["name"]}')
             for achievement in user['achievements']:
                 row = cells[(curr_row - 1) * col_n:]
                 row[0].value = user_id
