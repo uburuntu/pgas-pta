@@ -1,4 +1,6 @@
 import json
+import multiprocessing.pool
+from copy import deepcopy
 from datetime import datetime
 
 from bs4 import BeautifulSoup
@@ -14,6 +16,7 @@ class LomonosovMSU:
     def __init__(self):
         self.data = {}
         self.grab = None
+        self.pool = multiprocessing.pool.ThreadPool(processes=8)
 
     def load(self, filename='data_dump.json'):
         with open(filename, 'r', encoding='utf-8') as file:
@@ -31,17 +34,16 @@ class LomonosovMSU:
         self.grab.submit()
 
     def scrap_data(self, users_file_name):
-        for user_id in csv_to_list(users_file_name):
-            self.scrap_data_single(user_id)
+        self.pool.map(self.scrap_data_single, csv_to_list(users_file_name))
 
     def scrap_data_single(self, user_id):
-        data = self.data
-        self.grab.go(f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list')
-        soup = BeautifulSoup(self.grab.doc.body, features="lxml")
+        grab = deepcopy(self.grab)
+        grab.go(f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list')
+        soup = BeautifulSoup(grab.doc.body, features="lxml")
         self.data[user_id] = {'name': soup.find('h3', {'class': 'achievements-user__name'}).text.strip(),
                               'url': f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list',
                               'achievements': []}
-        print_subsection(f'Processing data for {user_id} — {data[user_id]["name"]}')
+        # print_subsection(f'Processing data for {user_id} — {data[user_id]["name"]}')
         for achievement in soup.find_all("article", {"class": "achievement"}):
             if achievement.find("input", {"checked": "checked"}):
                 curr_data = {
@@ -53,15 +55,15 @@ class LomonosovMSU:
                 self.data[user_id]['achievements'].append(curr_data)
 
     def scrap_achievements(self):
-        for user_id in self.data:
-            self.scrap_achievements_single(user_id)
+        self.pool.map(self.scrap_achievements_single, self.data.keys())
 
     def scrap_achievements_single(self, user_id):
-        print_subsection(f'Processing {len(self.data[user_id]["achievements"]):>2} achievement(s) for {user_id} '
-                         f'— {self.data[user_id]["name"]}')
+        # print_subsection(f'Processing {len(self.data[user_id]["achievements"]):>2} achievement(s) for {user_id} '
+        #                  f'— {self.data[user_id]["name"]}')
+        grab = deepcopy(self.grab)
         for achievement in self.data[user_id]['achievements']:
-            self.grab.go(achievement['url'])
-            soup = BeautifulSoup(self.grab.doc.body, features="lxml")
+            grab.go(achievement['url'])
+            soup = BeautifulSoup(grab.doc.body, features="lxml")
             for row in soup.find_all("div", {"class": "request__row"}):
                 if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                     achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
