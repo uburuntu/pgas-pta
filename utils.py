@@ -11,7 +11,7 @@ def range_grid(cell_start, cell_end):
 def csv_to_list(file_name):
     with open(file_name, 'r') as file:
         reader_users = csv.reader(file)
-        return [x[0] for x in list(reader_users)]
+        return set(x[0] for x in list(reader_users))
 
 
 def print_section(text):
