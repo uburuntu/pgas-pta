@@ -4,7 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from grab import Grab
 
-from utils import csv_to_list, print_subsection, achievement_type
+from utils import csv_to_list, print_subsection, AchievementType
 
 
 class LomonosovMSU:
@@ -53,7 +53,8 @@ class LomonosovMSU:
         for user_id, user in data.items():
             user['url'] = f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list'
             for achievement in user['achievements']:
-                achievement['type'] = achievement_type(achievement['category'])
+                achievement['type'] = AchievementType.achievement_type(achievement['category'])
+            user['type'] = AchievementType.user_type(user['achievements'])
 
     def scrap_achievements(self):
         data = self.data
