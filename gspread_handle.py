@@ -52,25 +52,21 @@ class GSpread:
         worksheet = self.get_main_worksheet()
 
         row_n, col_n = len(data) + 1, 5
-        curr_row = 1
-        cells = worksheet.range(range_grid((curr_row, 1), (row_n, col_n)))
+        cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
+        curr = iter(cells)
 
-        row = cells[(curr_row - 1) * col_n:]
-        row[0].value = 'ID'
-        row[1].value = 'ФИО'
-        row[2].value = 'Номер группы'
-        row[3].value = 'Баллы'
-        row[4].value = 'URL'
-        curr_row += 1
+        next(curr).value = 'ID'
+        next(curr).value = 'ФИО'
+        next(curr).value = 'Номер группы'
+        next(curr).value = 'Баллы'
+        next(curr).value = 'URL'
 
         for user_id, user in data.items():
-            row = cells[(curr_row - 1) * col_n:]
-            row[0].value = user_id
-            row[1].value = user['name']
-            row[2].value = 'n/a'
-            row[3].value = sum([int(x['score']) for x in user['achievements']])
-            row[4].value = user['url']
-            curr_row += 1
+            next(curr).value = user_id
+            next(curr).value = user['name']
+            next(curr).value = 'n/a'
+            next(curr).value = sum([int(x['score']) for x in user['achievements']])
+            next(curr).value = user['url']
 
         worksheet.update_cells(cells)
 
@@ -78,31 +74,27 @@ class GSpread:
         worksheet = self.get_achievements_worksheet()
 
         row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, 8
-        curr_row = 1
-        cells = worksheet.range(range_grid((curr_row, 1), (row_n, col_n)))
+        cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
+        curr = iter(cells)
 
-        row = cells[(curr_row - 1) * col_n:]
-        row[0].value = 'ID'
-        row[1].value = 'ФИО'
-        row[2].value = 'Название'
-        row[3].value = 'Категория'
-        row[4].value = 'Дата получения'
-        row[5].value = 'Балл'
-        row[6].value = 'URL достижения'
-        row[7].value = 'URL подтверждения'
-        curr_row += 1
+        next(curr).value = 'ID'
+        next(curr).value = 'ФИО'
+        next(curr).value = 'Название'
+        next(curr).value = 'Категория'
+        next(curr).value = 'Дата получения'
+        next(curr).value = 'Балл'
+        next(curr).value = 'URL достижения'
+        next(curr).value = 'URL подтверждения'
 
         for user_id, user in data.items():
             for achievement in user['achievements']:
-                row = cells[(curr_row - 1) * col_n:]
-                row[0].value = user_id
-                row[1].value = user['name']
-                row[2].value = achievement['title']
-                row[3].value = achievement['category']
-                row[4].value = achievement['date']
-                row[5].value = achievement['score']
-                row[6].value = achievement['url']
-                row[7].value = achievement['file']
-                curr_row += 1
+                next(curr).value = user_id
+                next(curr).value = user['name']
+                next(curr).value = achievement['title']
+                next(curr).value = achievement['category']
+                next(curr).value = achievement['date']
+                next(curr).value = achievement['score']
+                next(curr).value = achievement['url']
+                next(curr).value = achievement['file']
 
         worksheet.update_cells(cells)
