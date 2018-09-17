@@ -51,7 +51,7 @@ class GSpread:
     def fill_main_worksheet(self, data):
         worksheet = self.get_main_worksheet()
 
-        row_n, col_n = len(data) + 1, 5
+        row_n, col_n = len(data) + 1, 6
         cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
         curr = iter(cells)
 
@@ -59,6 +59,7 @@ class GSpread:
         next(curr).value = 'ФИО'
         next(curr).value = 'Номер группы'
         next(curr).value = 'Баллы'
+        next(curr).value = 'Тип'
         next(curr).value = 'URL'
 
         for user_id, user in data.items():
@@ -66,6 +67,7 @@ class GSpread:
             next(curr).value = user['name']
             next(curr).value = 'n/a'
             next(curr).value = sum([int(x['score']) for x in user['achievements']])
+            next(curr).value = user['type']
             next(curr).value = user['url']
 
         worksheet.update_cells(cells)
@@ -73,16 +75,17 @@ class GSpread:
     def fill_achievements_worksheet(self, data):
         worksheet = self.get_achievements_worksheet()
 
-        row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, 8
+        row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, 9
         cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
         curr = iter(cells)
 
         next(curr).value = 'ID'
         next(curr).value = 'ФИО'
-        next(curr).value = 'Название'
+        next(curr).value = 'Тип'
         next(curr).value = 'Категория'
-        next(curr).value = 'Дата получения'
+        next(curr).value = 'Название'
         next(curr).value = 'Балл'
+        next(curr).value = 'Дата получения'
         next(curr).value = 'URL достижения'
         next(curr).value = 'URL подтверждения'
 
@@ -90,10 +93,11 @@ class GSpread:
             for achievement in user['achievements']:
                 next(curr).value = user_id
                 next(curr).value = user['name']
-                next(curr).value = achievement['title']
+                next(curr).value = achievement['type']
                 next(curr).value = achievement['category']
-                next(curr).value = achievement['date']
+                next(curr).value = achievement['title']
                 next(curr).value = achievement['score']
+                next(curr).value = achievement['date']
                 next(curr).value = achievement['url']
                 next(curr).value = achievement['file']
 
