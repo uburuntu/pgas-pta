@@ -86,3 +86,4 @@ class LomonosovMSU:
             for achievement in user['achievements']:
                 achievement['type'] = AchievementsHandle.achievement_type(achievement['category'])
             user['type'] = AchievementsHandle.user_type(user['achievements'])
+            user['score'] = sum([int(x['score']) for x in user['achievements']])

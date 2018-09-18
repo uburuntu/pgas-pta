@@ -66,7 +66,7 @@ class GSpread:
             next(curr).value = user_id
             next(curr).value = user['name']
             next(curr).value = 'n/a'
-            next(curr).value = sum([int(x['score']) for x in user['achievements']])
+            next(curr).value = user['score']
             next(curr).value = user['type']
             next(curr).value = user['url']
 
