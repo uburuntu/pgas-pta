@@ -4,7 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from grab import Grab
 
-from utils import csv_to_list, print_subsection, AchievementsHandle
+from utils import AchievementsHandle, csv_to_list, print_subsection
 
 
 class LomonosovMSU:
@@ -37,7 +37,7 @@ class LomonosovMSU:
             soup = BeautifulSoup(self.grab.doc.body, features="lxml")
             data[user_id] = {'name'        : soup.find('h3', {'class': 'achievements-user__name'}).text.strip(),
                              'achievements': []}
-            print_subsection(f'Processing data for {user_id} — {data[user_id]["name"]}')
+            print_subsection(f'Processing data for \"{data[user_id]["name"]}\"')
             for achievement in soup.find_all("article", {"class": "achievement"}):
                 if achievement.find("input", {"checked": "checked"}):
                     curr_data = {
@@ -51,8 +51,7 @@ class LomonosovMSU:
     def scrap_achievements(self):
         data = self.data
         for user_id, user in data.items():
-            print_subsection(f'Processing {len(user["achievements"]):>2} achievement(s) for {user_id} '
-                             f'— {data[user_id]["name"]}')
+            print_subsection(f'Scrapping {len(user["achievements"]):>2} achievement(s) for \"{data[user_id]["name"]}\"')
             for achievement in user['achievements']:
                 self.grab.go(achievement['url'])
                 soup = BeautifulSoup(self.grab.doc.body, features="lxml")
@@ -68,11 +67,13 @@ class LomonosovMSU:
         for user_id, user in data.items():
             achievements = user['achievements']
             # Remove outdated achievements
+            count_removed = 0
             for achievement in achievements[:]:
                 if datetime.strptime(achievement['date'], '%d.%m.%Y') < self.achievements_fire_day:
-                    print_subsection(f'Excluding user ({user_id} — {data[user_id]["name"]}) achievement cause of date: '
-                                     f'{achievement["date"]} ({achievement["url"]})')
                     achievements.remove(achievement)
+                    count_removed += 1
+            if count_removed > 0:
+                print_subsection(f'Removed {count_removed:>2} achievements for \"{data[user_id]["name"]}\"')
 
             if False:
                 # Left only 2 max achievements

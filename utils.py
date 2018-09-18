@@ -59,6 +59,7 @@ class AchievementsHandle:
     def user_type(achievements):
         def type_score(type):
             return sum([int(x['score']) if type == x['type'] else 0 for x in achievements])
+
         max_score = max([(x.value, type_score(x.value)) for x in AchievementsHandle.AchievementType], key=itemgetter(1))
         return max_score[0] if max_score[1] != 0 else AchievementsHandle.AchievementType.unknown.value
 
