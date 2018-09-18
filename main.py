@@ -29,11 +29,11 @@ if __name__ == '__main__':
         print_section(f'Collecting {len(lmsu.data)} user(s) achievements')
         lmsu.scrap_achievements()
 
-    print_section(f'Postprocess scrapping')
-    lmsu.scrap_postprocess()
-
     print_section(f'Filtering {len(lmsu.data)} user(s)')
     lmsu.filter_users()
+
+    print_section(f'Postprocess data')
+    lmsu.data_postprocess()
 
     print_section(f'Dumping users data to file')
     lmsu.dump()

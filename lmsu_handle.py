@@ -48,14 +48,6 @@ class LomonosovMSU:
                     }
                     data[user_id]['achievements'].append(curr_data)
 
-    def scrap_postprocess(self):
-        data = self.data
-        for user_id, user in data.items():
-            user['url'] = f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list'
-            for achievement in user['achievements']:
-                achievement['type'] = AchievementsHandle.achievement_type(achievement['category'])
-            user['type'] = AchievementsHandle.user_type(user['achievements'])
-
     def scrap_achievements(self):
         data = self.data
         for user_id, user in data.items():
@@ -85,3 +77,11 @@ class LomonosovMSU:
             if False:
                 # Left only 2 max achievements
                 user['achievements'] = sorted(achievements, reverse=True, key=lambda x: int(x['score']))[:2]
+
+    def data_postprocess(self):
+        data = self.data
+        for user_id, user in data.items():
+            user['url'] = f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list'
+            for achievement in user['achievements']:
+                achievement['type'] = AchievementsHandle.achievement_type(achievement['category'])
+            user['type'] = AchievementsHandle.user_type(user['achievements'])
