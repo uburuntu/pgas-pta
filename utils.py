@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 from enum import Enum
 from operator import itemgetter
 
@@ -16,17 +17,24 @@ def csv_to_list(file_name):
         return sorted(set(x[0] for x in list(reader_users)))
 
 
-def print_section(text):
-    me = print_section
+def section(text):
+    me = section
     if not hasattr(me, 'count'):
         me.count = 1
-    print('--- {:>4}. {}'.format(me.count, text))
+    if not hasattr(me, 'time'):
+        me.time = datetime.now()
+        print('--- {:>4}. {}'.format(me.count, text))
+        return
+    now = datetime.now()
+    print('=== {:>4}. Section executed in {}\n'.format(me.count, now - me.time))
+    me.time = now
     me.count += 1
+    print('--- {:>4}. {}'.format(me.count, text))
 
 
-def print_subsection(text):
-    me = print_subsection
-    parent = print_section
+def subsection(text):
+    me = subsection
+    parent = section
     if not hasattr(me, 'count'):
         me.count = 1
     if not hasattr(me, 'last') or me.last != getattr(parent, 'count', 0):

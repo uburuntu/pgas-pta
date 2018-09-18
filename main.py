@@ -1,7 +1,7 @@
 import passwords
 from gspread_handle import GSpread
 from lmsu_handle import LomonosovMSU
-from utils import print_section
+from utils import section
 
 if __name__ == '__main__':
     #
@@ -17,35 +17,37 @@ if __name__ == '__main__':
     lmsu = LomonosovMSU()
 
     if lmsu_data_from_file:
-        print_section('Loading data from file')
+        section('Loading data from file')
         lmsu.load()
     else:
-        print_section('Connecting to Lomonosov network')
+        section('Connecting to Lomonosov network')
         lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
 
-        print_section('Collecting users info')
+        section('Collecting users info')
         lmsu.scrap_data(users_filename)
 
-        print_section(f'Collecting {len(lmsu.data)} user(s) achievements')
+        section(f'Collecting {len(lmsu.data)} user(s) achievements')
         lmsu.scrap_achievements()
 
-    print_section(f'Filtering {len(lmsu.data)} user(s)')
+    section(f'Filtering {len(lmsu.data)} user(s)')
     lmsu.filter_users()
 
-    print_section(f'Postprocess data')
+    section(f'Postprocess data')
     lmsu.data_postprocess()
 
-    print_section(f'Dumping users data to file')
+    section(f'Dumping users data to file')
     lmsu.dump()
 
     #
     # Google table
     #
-    print_section('Connecting to Google Spreadsheets')
+    section('Connecting to Google Spreadsheets')
     gspread = GSpread(google_key_filename)
 
-    print_section('Filling main worksheet with our data')
+    section('Filling main worksheet with our data')
     gspread.fill_main_worksheet(lmsu.data)
 
-    print_section('Filling achievements with our data')
+    section('Filling achievements with our data')
     gspread.fill_achievements_worksheet(lmsu.data)
+
+    section('The End!')
