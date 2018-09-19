@@ -59,8 +59,8 @@ class LomonosovMSU:
                     if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                         achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
                 file = soup.find("a", {"class": "file-list__file-name"})
-                if file:
-                    achievement['file'] = self.lmsu_url + file.attrs['href']
+                achievement['file'] = self.lmsu_url + file.attrs['href'] if file else ''
+        subsection(f'Total achievements: {sum([len(user["achievements"]) for user in data.values()])}')
 
     def filter_users(self):
         data = self.data
@@ -78,6 +78,7 @@ class LomonosovMSU:
             if False:
                 # Left only 2 max achievements
                 user['achievements'] = sorted(achievements, reverse=True, key=lambda x: int(x['score']))[:2]
+        subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
 
     def data_postprocess(self):
         data = self.data
