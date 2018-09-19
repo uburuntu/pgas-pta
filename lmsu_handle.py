@@ -9,10 +9,10 @@ from utils import AchievementsHandle, csv_to_list, subsection
 
 class LomonosovMSU:
     lmsu_url = 'https://lomonosov-msu.ru'
-    achievements_fire_day = datetime(2017, 9, 14)
 
-    def __init__(self):
+    def __init__(self, achievements_fire_day):
         self.data = {}
+        self.achievements_fire_day = achievements_fire_day
         self.grab = None
 
     def load(self, filename='data_dump.json'):

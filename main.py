@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import passwords
 from gspread_handle import GSpread
 from lmsu_handle import LomonosovMSU
@@ -8,13 +10,14 @@ if __name__ == '__main__':
     # Script arguments
     #
     lmsu_data_from_file = True
+    achievements_fire_day = datetime(2017, 9, 14)
     users_filename = 'users.csv'
     google_key_filename = 'key.json'
 
     #
     # MSU
     #
-    lmsu = LomonosovMSU()
+    lmsu = LomonosovMSU(achievements_fire_day)
 
     if lmsu_data_from_file:
         section('Loading data from file')
