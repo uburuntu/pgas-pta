@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 from datetime import datetime
 
 from bs4 import BeautifulSoup
@@ -88,3 +89,11 @@ class LomonosovMSU:
                 achievement['type'] = AchievementsHandle.achievement_type(achievement['category'])
             user['type'] = AchievementsHandle.user_type(user['achievements'])
             user['score'] = sum([int(x['score']) for x in user['achievements']])
+
+    def analyze_extensions(self):
+        extensions = []
+        for user in self.data.values():
+            for achievement in user['achievements']:
+                extensions.append(achievement['file'].split('.')[-1])
+        counter = Counter(extensions)
+        subsection(counter.most_common())

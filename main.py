@@ -41,6 +41,9 @@ if __name__ == '__main__':
     section(f'Dumping users data to file')
     lmsu.dump()
 
+    section(f'Analyze extensions')
+    lmsu.analyze_extensions()
+
     #
     # Google table
     #
