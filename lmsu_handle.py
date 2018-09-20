@@ -87,7 +87,7 @@ class LomonosovMSU:
             user['url'] = f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list'
             for achievement in user['achievements']:
                 achievement['type'] = AchievementsHandle.achievement_type(achievement['category'])
-            user['type'] = AchievementsHandle.user_type(user['achievements'])
+            user['type'], user['type_273'] = AchievementsHandle.user_type(user['achievements'])
             user['score'] = sum([int(x['score']) for x in user['achievements']])
 
     def analyze_extensions(self):

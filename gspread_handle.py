@@ -51,7 +51,7 @@ class GSpread:
     def fill_main_worksheet(self, data):
         worksheet = self.get_main_worksheet()
 
-        row_n, col_n = len(data) + 1, 6
+        row_n, col_n = len(data) + 1, 7
         cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
         curr = iter(cells)
 
@@ -60,6 +60,7 @@ class GSpread:
         next(curr).value = 'Номер группы'
         next(curr).value = 'Баллы'
         next(curr).value = 'Тип'
+        next(curr).value = 'Тип 273-ФЗ'
         next(curr).value = 'URL'
 
         for user_id, user in data.items():
@@ -68,6 +69,7 @@ class GSpread:
             next(curr).value = 'n/a'
             next(curr).value = user['score']
             next(curr).value = user['type']
+            next(curr).value = user['type_273']
             next(curr).value = user['url']
 
         worksheet.update_cells(cells)

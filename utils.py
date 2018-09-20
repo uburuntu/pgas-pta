@@ -56,20 +56,38 @@ def intersect_each_other(*args):
 
 class AchievementsHandle:
     class AchievementType(Enum):
+        unknown = 'Неизвестно'
         education = 'Учёба'
         science = 'Наука'
         social = 'Общественная деятельность'
         culture = 'Культура'
         sport = 'Спорт'
-        unknown = 'Неизвестно'
+
+        @staticmethod
+        def type_273(type):
+            types = AchievementsHandle.AchievementType
+            return {
+                types.unknown  : 'n/a',
+                types.education: '7',
+                types.science  : '8',
+                types.social   : '9',
+                types.culture  : '10',
+                types.sport    : '11',
+            }[type]
 
     @staticmethod
     def user_type(achievements):
         def type_score(type):
             return sum([int(x['score']) if type == x['type'] else 0 for x in achievements])
 
-        max_score = max([(x.value, type_score(x.value)) for x in AchievementsHandle.AchievementType], key=itemgetter(1))
-        return max_score[0] if max_score[1] != 0 else AchievementsHandle.AchievementType.unknown.value
+        max_score = max([(x, type_score(x.value)) for x in AchievementsHandle.AchievementType], key=itemgetter(1))
+        return max_score[0].value, AchievementsHandle.type_as_in_273_federal_law(*max_score)
+
+    @staticmethod
+    def type_as_in_273_federal_law(type, score):
+        types = AchievementsHandle.AchievementType
+        subtypes = ['а', 'б', 'в']
+        return types.type_273(type) + (subtypes[type == types.education:][-score % 3] if type != types.unknown else '')
 
     @staticmethod
     def achievement_type(category):
