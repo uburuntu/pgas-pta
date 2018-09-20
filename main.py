@@ -1,11 +1,12 @@
 from datetime import datetime
 
-import passwords
-from gspread_handle import GSpread
-from lmsu_handle import LomonosovMSU
-from utils import section
+from pgas import passwords
+from pgas.gspread_handle import GSpread
+from pgas.lmsu_handle import LomonosovMSU
+from pgas.utils import section
 
-if __name__ == '__main__':
+
+def main():
     #
     # Script arguments
     #
@@ -57,3 +58,7 @@ if __name__ == '__main__':
     gspread.fill_achievements_worksheet(lmsu.data)
 
     section('The End!')
+
+
+if __name__ == '__main__':
+    main()

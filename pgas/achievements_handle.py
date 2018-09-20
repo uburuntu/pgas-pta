@@ -1,7 +1,7 @@
 from enum import Enum
 from operator import itemgetter
 
-from utils import intersect_each_other
+from pgas.utils import intersect_each_other
 
 
 class AchievementsHandle:

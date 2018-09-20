@@ -5,8 +5,8 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from grab import Grab
 
-from achievements_handle import AchievementsHandle
-from utils import csv_to_list, subsection
+from pgas.achievements_handle import AchievementsHandle
+from pgas.utils import csv_to_list, subsection
 
 
 class LomonosovMSU:

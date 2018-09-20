@@ -2,7 +2,7 @@ import gspread
 from gspread import WorksheetNotFound
 from oauth2client.service_account import ServiceAccountCredentials
 
-from utils import range_grid
+from pgas.utils import range_grid
 
 
 class GSpread:
