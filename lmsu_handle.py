@@ -40,14 +40,14 @@ class LomonosovMSU:
                              'achievements': []}
             subsection(f'Processing data for \"{data[user_id]["name"]}\"')
             for achievement in soup.find_all("article", {"class": "achievement"}):
-                if achievement.find("input", {"checked": "checked"}):
-                    curr_data = {
-                        'title'   : achievement.find("a", {"class": "achievement__link"}).text.strip(),
-                        'category': achievement.find("p", {"class": "achievement__more"}).text.strip(),
-                        'score'   : achievement.find("span", {"class": "ach-pill"}).text,
-                        'url'     : self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href']
-                    }
-                    data[user_id]['achievements'].append(curr_data)
+                curr_data = {
+                    'title'   : achievement.find("a", {"class": "achievement__link"}).text.strip(),
+                    'category': achievement.find("p", {"class": "achievement__more"}).text.strip(),
+                    'score'   : achievement.find("span", {"class": "ach-pill"}).text,
+                    'checked' : bool(achievement.find("input", {"checked": "checked"})),
+                    'url'     : self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href'],
+                }
+                data[user_id]['achievements'].append(curr_data)
 
     def scrap_achievements(self):
         data = self.data

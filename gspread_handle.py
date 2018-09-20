@@ -75,7 +75,7 @@ class GSpread:
     def fill_achievements_worksheet(self, data):
         worksheet = self.get_achievements_worksheet()
 
-        row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, 9
+        row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, 10
         cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
         curr = iter(cells)
 
@@ -86,6 +86,7 @@ class GSpread:
         next(curr).value = 'Название'
         next(curr).value = 'Балл'
         next(curr).value = 'Дата получения'
+        next(curr).value = 'Проверено'
         next(curr).value = 'URL достижения'
         next(curr).value = 'URL подтверждения'
 
@@ -98,6 +99,7 @@ class GSpread:
                 next(curr).value = achievement['title']
                 next(curr).value = achievement['score']
                 next(curr).value = achievement['date']
+                next(curr).value = achievement['checked']
                 next(curr).value = achievement['url']
                 next(curr).value = achievement['file']
 
