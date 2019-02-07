@@ -16,8 +16,10 @@ class GSpread:
         self.achievements_worksheet = None
 
     def authorization_on_google(self, key_file):
-        scope = ['https://www.googleapis.com/auth/spreadsheets',
-                 'https://www.googleapis.com/auth/drive']
+        scope = [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'https://www.googleapis.com/auth/drive',
+        ]
 
         credentials = ServiceAccountCredentials.from_json_keyfile_name(key_file, scope)
         self.gs = gspread.authorize(credentials)
