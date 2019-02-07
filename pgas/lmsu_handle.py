@@ -2,20 +2,19 @@ import json
 from collections import Counter
 from datetime import datetime
 
+import requests
 from bs4 import BeautifulSoup
-from grab import Grab
 
 from pgas.achievements_handle import AchievementsHandle
-from pgas.utils import csv_to_list, subsection
+from pgas.utils import file_to_list, subsection
 
 
 class LomonosovMSU:
     lmsu_url = 'https://lomonosov-msu.ru'
 
-    def __init__(self, achievements_fire_day):
+    def __init__(self):
         self.data = {}
-        self.achievements_fire_day = achievements_fire_day
-        self.grab = None
+        self.session = requests.session()
 
     def load(self, filename='data_dump.json'):
         with open(filename, 'r', encoding='utf-8') as file:
@@ -26,17 +25,21 @@ class LomonosovMSU:
             json.dump(self.data, file, indent=True, ensure_ascii=False)
 
     def authorization_on_msu(self, username, password):
-        self.grab = Grab()
-        self.grab.go(self.lmsu_url + '/rus/login')
-        self.grab.doc.set_input('_username', username)
-        self.grab.doc.set_input('_password', password)
-        self.grab.submit()
+        login_url = f'{self.lmsu_url}/rus/login'
+        login_page = self.session.get(login_url)
+        csrf_token = BeautifulSoup(login_page.text, features='lxml').find('input', {'name': '_csrf_token'})['value']
+
+        data = {'_username': username, '_password': password, '_remember_me': 'on', '_csrf_token': csrf_token}
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        response = self.session.post(f'{self.lmsu_url}/login_check', data=data, headers=headers, allow_redirects=False)
+        # Success - if not redirect back to login
+        return response.next.url != login_url
 
     def scrap_data(self, users_file_name):
         data = self.data
-        for user_id in csv_to_list(users_file_name):
-            self.grab.go(f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list')
-            soup = BeautifulSoup(self.grab.doc.body, features="lxml")
+        for user_id in file_to_list(users_file_name):
+            response = self.session.get(f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list')
+            soup = BeautifulSoup(response.text, features="lxml")
             data[user_id] = {'name'        : soup.find('h3', {'class': 'achievements-user__name'}).text.strip(),
                              'achievements': []}
             subsection(f'Processing data for \"{data[user_id]["name"]}\"')
@@ -55,8 +58,8 @@ class LomonosovMSU:
         for user_id, user in data.items():
             subsection(f'Scrapping {len(user["achievements"]):>2} achievement(s) for \"{data[user_id]["name"]}\"')
             for achievement in user['achievements']:
-                self.grab.go(achievement['url'])
-                soup = BeautifulSoup(self.grab.doc.body, features="lxml")
+                response = self.session.get(achievement['url'])
+                soup = BeautifulSoup(response.text, features="lxml")
                 for row in soup.find_all("div", {"class": "request__row"}):
                     if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                         achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
@@ -64,22 +67,20 @@ class LomonosovMSU:
                 achievement['file'] = self.lmsu_url + file.attrs['href'] if file else ''
         subsection(f'Total achievements: {sum([len(user["achievements"]) for user in data.values()])}')
 
-    def filter_users(self):
+    def filter_users(self, achievements_fire_date_one_year, achievements_fire_date_last_pgas, users_id_last_pgas):
         data = self.data
         for user_id, user in data.items():
             achievements = user['achievements']
+
             # Remove outdated achievements
             count_removed = 0
             for achievement in achievements[:]:
-                if datetime.strptime(achievement['date'], '%d.%m.%Y') < self.achievements_fire_day:
+                date = datetime.strptime(achievement['date'], '%d.%m.%Y')
+                if (date < achievements_fire_date_last_pgas and user_id in users_id_last_pgas) or (date < achievements_fire_date_one_year):
                     achievements.remove(achievement)
                     count_removed += 1
             if count_removed > 0:
                 subsection(f'Removed {count_removed:>2} achievements for \"{data[user_id]["name"]}\"')
-
-            if False:
-                # Left only 2 max achievements
-                user['achievements'] = sorted(achievements, reverse=True, key=lambda x: int(x['score']))[:2]
         subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
 
     def data_postprocess(self):

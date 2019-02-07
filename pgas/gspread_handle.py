@@ -24,8 +24,7 @@ class GSpread:
 
     def get_spreadsheet(self):
         if not self.spreadsheet:
-            self.spreadsheet = self.gs.open_by_url('https://docs.google.com/spreadsheets/d/'
-                                                   '1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc')
+            self.spreadsheet = self.gs.open_by_url('https://docs.google.com/spreadsheets/d/1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc')
         return self.spreadsheet
 
     def share_access(self, email, role='writer'):
@@ -35,7 +34,7 @@ class GSpread:
         try:
             sheet = self.get_spreadsheet().worksheet(title)
         except WorksheetNotFound:
-            sheet = self.get_spreadsheet().add_worksheet(title, 5000, 26)
+            sheet = self.get_spreadsheet().add_worksheet(title, 15000, 26)
         return sheet
 
     def get_main_worksheet(self):

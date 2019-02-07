@@ -3,29 +3,32 @@ from datetime import datetime
 from pgas import passwords
 from pgas.gspread_handle import GSpread
 from pgas.lmsu_handle import LomonosovMSU
-from pgas.utils import section
+from pgas.utils import file_to_list, section
 
 
 def main():
     #
     # Script arguments
     #
-    lmsu_data_from_file = True
-    achievements_fire_day = datetime(2017, 9, 14)
-    users_filename = 'users.csv'
+    lmsu_data_from_file = False
+    achievements_fire_date_one_year = datetime(2018, 2, 14)
+    achievements_fire_date_last_pgas = datetime(2018, 9, 14)
+    users_filename = 'users.txt'
+    users_last_pgas_filename = 'users_id_last_pgas.txt'
     google_key_filename = 'key.json'
 
     #
     # MSU
     #
-    lmsu = LomonosovMSU(achievements_fire_day)
+    lmsu = LomonosovMSU()
 
     if lmsu_data_from_file:
         section('Loading data from file')
         lmsu.load()
     else:
         section('Connecting to Lomonosov network')
-        lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
+        success = lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
+        assert success
 
         section('Collecting users info')
         lmsu.scrap_data(users_filename)
@@ -34,7 +37,7 @@ def main():
         lmsu.scrap_achievements()
 
     section(f'Filtering {len(lmsu.data)} user(s)')
-    lmsu.filter_users()
+    lmsu.filter_users(achievements_fire_date_one_year, achievements_fire_date_last_pgas, file_to_list(users_last_pgas_filename))
 
     section(f'Postprocess data')
     lmsu.data_postprocess()

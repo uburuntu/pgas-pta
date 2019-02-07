@@ -1,18 +1,17 @@
-import csv
 from datetime import datetime
 
 from gspread.utils import rowcol_to_a1
 
 
 def range_grid(cell_start, cell_end):
-    ''' range_grid((1,1),(3,3)) = A1:C3 '''
+    """ range_grid((1,1),(3,3)) = A1:C3 """
     return f'{rowcol_to_a1(*cell_start)}:{rowcol_to_a1(*cell_end)}'
 
 
-def csv_to_list(file_name):
-    with open(file_name, 'r') as file:
-        reader_users = csv.reader(file)
-        return sorted(set(x[0] for x in list(reader_users)))
+def file_to_list(file_name):
+    with open(file_name, 'r', encoding='utf-8') as file:
+        items = file.read().replace('\n', ' ').split()
+        return items
 
 
 def section(text):
