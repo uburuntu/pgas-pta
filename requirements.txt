@@ -1,4 +1,6 @@
+aiohttp
+aiodns
 beautifulsoup4
-grab
+cchardet
 gspread
 oauth2client

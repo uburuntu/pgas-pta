@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from pgas import passwords
@@ -6,13 +7,13 @@ from pgas.lmsu_handle import LomonosovMSU
 from pgas.utils import file_to_list, section
 
 
-def main():
+async def main():
     #
     # Script arguments
     #
-    lmsu_data_from_file = True
-    achievements_fire_date_one_year = datetime(2018, 2, 14)
-    achievements_fire_date_last_pgas = datetime(2018, 9, 14)
+    lmsu_data_from_file = False
+    date_one_year = datetime(2018, 2, 14)
+    date_last_pgas = datetime(2018, 9, 14)
     users_filename = 'users.txt'
     users_last_pgas_filename = 'users_id_last_pgas.txt'
     google_key_filename = 'key.json'
@@ -24,21 +25,21 @@ def main():
 
     if lmsu_data_from_file:
         section('Loading data from file')
-        lmsu.load('data_dump_old.json')
+        lmsu.load()
     else:
         section('Connecting to Lomonosov network')
-        success = lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
-        assert success
+        await lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
 
         section('Collecting users info')
-        lmsu.scrap_data(users_filename)
+        await lmsu.scrap_users(file_to_list(users_filename))
 
         section(f'Collecting {len(lmsu.data)} user(s) achievements')
-        lmsu.scrap_achievements()
+        await lmsu.scrap_achievements()
+
+        await lmsu.session.close()
 
     section(f'Filtering {len(lmsu.data)} user(s)')
-    lmsu.delete_outdated_achievements(achievements_fire_date_one_year, achievements_fire_date_last_pgas,
-                                      file_to_list(users_last_pgas_filename))
+    lmsu.delete_outdated_achievements(date_one_year, date_last_pgas, file_to_list(users_last_pgas_filename))
 
     section(f'Postprocess data')
     lmsu.data_postprocess()
@@ -65,4 +66,17 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # Init async loop
+    ev_loop = asyncio.get_event_loop()
+    try:
+        # Run
+        ev_loop.run_until_complete(main())
+
+        # Wait for other tasks
+        pending = asyncio.Task.all_tasks()
+        ev_loop.run_until_complete(asyncio.gather(*pending))
+    except KeyboardInterrupt:
+        print('KeyboardInterrupt: good bye!')
+    finally:
+        ev_loop.run_until_complete(ev_loop.shutdown_asyncgens())
+        ev_loop.close()

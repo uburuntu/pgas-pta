@@ -78,7 +78,11 @@ class GSpread:
         worksheet = self.get_achievements_worksheet()
         worksheet.clear()
 
-        cols = ['ID', 'ФИО', 'Тип', 'Категория', 'Название', 'Балл', 'Дата получения', 'Проверено', 'URL достижения', 'URL подтверждения']
+        cols = [
+            'ID', 'ФИО', 'Тип', 'Категория', 'Название',
+            'Балл', 'Дата получения', 'Проверено', 'Комментарий', 'Наш комментарий',
+            'URL достижения', 'URL подтверждения',
+        ]
         row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, len(cols)
         cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
         curr = iter(cells)
@@ -93,9 +97,11 @@ class GSpread:
                 next(curr).value = achievement['type']
                 next(curr).value = achievement['category']
                 next(curr).value = achievement['title']
-                next(curr).value = achievement['score']
+                next(curr).value = achievement.get('score_our', achievement['score'])
                 next(curr).value = achievement['date']
-                next(curr).value = 1  # achievement['checked']
+                next(curr).value = achievement['checked']
+                next(curr).value = achievement['comment']
+                next(curr).value = achievement['comment_our']
                 next(curr).value = achievement['url']
                 next(curr).value = achievement['file']
 
