@@ -1,6 +1,7 @@
 import json
 from collections import Counter
 from datetime import datetime
+from itertools import chain
 
 import requests
 from bs4 import BeautifulSoup
@@ -67,30 +68,55 @@ class LomonosovMSU:
                 achievement['file'] = self.lmsu_url + file.attrs['href'] if file else ''
         subsection(f'Total achievements: {sum([len(user["achievements"]) for user in data.values()])}')
 
-    def filter_users(self, achievements_fire_date_one_year, achievements_fire_date_last_pgas, users_id_last_pgas):
+    def delete_outdated_achievements(self, date_one_year, date_last_pgas, ids_last_pgas):
         data = self.data
         for user_id, user in data.items():
             achievements = user['achievements']
 
-            # Remove outdated achievements
             count_removed = 0
             for achievement in achievements[:]:
                 date = datetime.strptime(achievement['date'], '%d.%m.%Y')
-                if (date < achievements_fire_date_last_pgas and user_id in users_id_last_pgas) or (date < achievements_fire_date_one_year):
+                if (date < date_last_pgas and user_id in ids_last_pgas) or (date < date_one_year):
                     achievements.remove(achievement)
                     count_removed += 1
             if count_removed > 0:
                 subsection(f'Removed {count_removed:>2} achievements for \"{data[user_id]["name"]}\"')
         subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
 
+    @staticmethod
+    def calculate_score(achievements):
+        types = AchievementsHandle.AchievementType
+        by_types = {e: [] for e in types}
+        for achievement in achievements:
+            by_types[AchievementsHandle.achievement_type(achievement['category'])].append(achievement)
+
+        def calculate_two_top_degree(sets, achievements):
+            scores_by_degrees = [0] * len(sets)
+            score_other = 0
+            for achievement in achievements:
+                for i, set_ in enumerate(sets):
+                    if achievement['category'] in set_:
+                        scores_by_degrees[i] += int(achievement['score'])
+                        break
+                else:
+                    score_other += int(achievement['score'])
+            return sum(sorted(scores_by_degrees, reverse=True)[2:]) + score_other
+
+        result = sum([int(x['score']) for x in chain(by_types[types.education], by_types[types.science], by_types[types.social])])
+        result += calculate_two_top_degree(AchievementsHandle.culture_by_degrees, by_types[types.culture])
+        result += calculate_two_top_degree(AchievementsHandle.sport_by_degrees, by_types[types.sport])
+        return result
+
     def data_postprocess(self):
         data = self.data
         for user_id, user in data.items():
+            user_name = user['name'].split()
+            user['name'] = f'{user_name[2]} {user_name[0]} {user_name[1]}' if len(user_name) == 3 else f'{user_name[1]} {user_name[0]}'
             user['url'] = f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list'
             for achievement in user['achievements']:
-                achievement['type'] = AchievementsHandle.achievement_type(achievement['category'])
+                achievement['type'] = AchievementsHandle.achievement_type(achievement['category']).value
             user['type'], user['type_273'] = AchievementsHandle.user_type(user['achievements'])
-            user['score'] = sum([int(x['score']) for x in user['achievements']])
+            user['score'] = self.calculate_score(user['achievements'])
 
     def analyze_extensions(self):
         extensions = []

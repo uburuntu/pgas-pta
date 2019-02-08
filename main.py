@@ -10,7 +10,7 @@ def main():
     #
     # Script arguments
     #
-    lmsu_data_from_file = False
+    lmsu_data_from_file = True
     achievements_fire_date_one_year = datetime(2018, 2, 14)
     achievements_fire_date_last_pgas = datetime(2018, 9, 14)
     users_filename = 'users.txt'
@@ -24,7 +24,7 @@ def main():
 
     if lmsu_data_from_file:
         section('Loading data from file')
-        lmsu.load()
+        lmsu.load('data_dump_old.json')
     else:
         section('Connecting to Lomonosov network')
         success = lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
@@ -37,7 +37,8 @@ def main():
         lmsu.scrap_achievements()
 
     section(f'Filtering {len(lmsu.data)} user(s)')
-    lmsu.filter_users(achievements_fire_date_one_year, achievements_fire_date_last_pgas, file_to_list(users_last_pgas_filename))
+    lmsu.delete_outdated_achievements(achievements_fire_date_one_year, achievements_fire_date_last_pgas,
+                                      file_to_list(users_last_pgas_filename))
 
     section(f'Postprocess data')
     lmsu.data_postprocess()
