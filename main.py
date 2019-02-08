@@ -27,16 +27,17 @@ async def main():
         section('Loading data from file')
         lmsu.load()
     else:
-        section('Connecting to Lomonosov network')
-        await lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
+        try:
+            section('Connecting to Lomonosov network')
+            await lmsu.authorization_on_msu(username=passwords.auth_login, password=passwords.auth_pswd)
 
-        section('Collecting users info')
-        await lmsu.scrap_users(file_to_list(users_filename))
+            section('Collecting users info')
+            await lmsu.scrap_users(file_to_list(users_filename))
 
-        section(f'Collecting {len(lmsu.data)} user(s) achievements')
-        await lmsu.scrap_achievements()
-
-        await lmsu.session.close()
+            section(f'Collecting {len(lmsu.data)} user(s) achievements')
+            await lmsu.scrap_achievements()
+        finally:
+            await lmsu.session.close()
 
     section(f'Filtering {len(lmsu.data)} user(s)')
     lmsu.delete_outdated_achievements(date_one_year, date_last_pgas, file_to_list(users_last_pgas_filename))

@@ -17,7 +17,7 @@ class LomonosovMSU:
 
     def __init__(self):
         self.data = {}
-        self.session = None
+        self.session: aiohttp.ClientSession = None
 
     def load(self, filename='data_dump.json'):
         with open(filename, 'r', encoding='utf-8') as file:
