@@ -1,7 +1,6 @@
 import json
 from collections import Counter
 from datetime import datetime
-from itertools import chain
 
 import requests
 from bs4 import BeautifulSoup
@@ -84,7 +83,7 @@ class LomonosovMSU:
         subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
 
     @staticmethod
-    def calculate_score(achievements):
+    def calculate_scores(achievements):
         types = AchievementsHandle.AchievementType
         by_types = {e: [] for e in types}
         for achievement in achievements:
@@ -102,10 +101,19 @@ class LomonosovMSU:
                     score_other += int(achievement['score'])
             return sum(sorted(scores_by_degrees, reverse=True)[2:]) + score_other
 
-        result = sum([int(x['score']) for x in chain(by_types[types.education], by_types[types.science], by_types[types.social])])
-        result += calculate_two_top_degree(AchievementsHandle.culture_by_degrees, by_types[types.culture])
-        result += calculate_two_top_degree(AchievementsHandle.sport_by_degrees, by_types[types.sport])
-        return result
+        return {
+            types.unknown: sum([int(x['score']) for x in by_types[types.unknown]]),
+            types.education: sum([int(x['score']) for x in by_types[types.education]]),
+            types.science: sum([int(x['score']) for x in by_types[types.science]]),
+            types.social: sum([int(x['score']) for x in by_types[types.social]]),
+            types.culture: calculate_two_top_degree(AchievementsHandle.culture_by_degrees, by_types[types.culture]),
+            types.sport: calculate_two_top_degree(AchievementsHandle.sport_by_degrees, by_types[types.sport]),
+        }
+
+    def calculate_score_and_type(self, achievements):
+        scores = self.calculate_scores(achievements)
+        sum_score, type = sum(scores.values()), max(scores, key=scores.get)
+        return sum_score, type.value, AchievementsHandle.type_as_in_273_federal_law(type, sum_score)
 
     def data_postprocess(self):
         data = self.data
@@ -115,8 +123,7 @@ class LomonosovMSU:
             user['url'] = f'{self.lmsu_url}/rus/user/achievement/user/{user_id}/list'
             for achievement in user['achievements']:
                 achievement['type'] = AchievementsHandle.achievement_type(achievement['category']).value
-            user['type'], user['type_273'] = AchievementsHandle.user_type(user['achievements'])
-            user['score'] = self.calculate_score(user['achievements'])
+            user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'])
 
     def analyze_extensions(self):
         extensions = []

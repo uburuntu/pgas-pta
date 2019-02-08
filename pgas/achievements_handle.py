@@ -1,5 +1,4 @@
 from enum import Enum
-from operator import itemgetter
 
 from pgas.utils import intersect_each_other
 
@@ -24,14 +23,6 @@ class AchievementsHandle:
                 types.culture  : '10',
                 types.sport    : '11',
             }[type]
-
-    @staticmethod
-    def user_type(achievements):
-        def type_score(type):
-            return sum([int(x['score']) if type == x['type'] else 0 for x in achievements])
-
-        max_score = max([(x, type_score(x.value)) for x in AchievementsHandle.AchievementType], key=itemgetter(1))
-        return max_score[0].value, AchievementsHandle.type_as_in_273_federal_law(*max_score)
 
     @staticmethod
     def type_as_in_273_federal_law(type, score):
