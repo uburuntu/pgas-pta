@@ -11,12 +11,11 @@ class GSpread:
     worksheet_rows = 15000
     worksheet_cols = 26
 
-    def __init__(self, key_file):
+    def __init__(self, key_file, spreadsheet_url):
         self.gs = None
         self.authorization_on_google(key_file)
 
-        self.spreadsheet = None
-
+        self.spreadsheet = self.get_spreadsheet(spreadsheet_url)
         self.main_worksheet = None
         self.achievements_worksheet = None
 
@@ -29,19 +28,17 @@ class GSpread:
         credentials = ServiceAccountCredentials.from_json_keyfile_name(key_file, scope)
         self.gs = gspread.authorize(credentials)
 
-    def get_spreadsheet(self):
-        if not self.spreadsheet:
-            self.spreadsheet = self.gs.open_by_url('https://docs.google.com/spreadsheets/d/1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc')
-        return self.spreadsheet
+    def get_spreadsheet(self, spreadsheet_url):
+        return self.gs.open_by_url(spreadsheet_url)
 
     def share_access(self, email, role='writer'):
-        self.get_spreadsheet().share(email, perm_type='user', role=role)
+        self.spreadsheet.share(email, perm_type='user', role=role)
 
     def get_sheet(self, title: str) -> Worksheet:
         try:
-            sheet = self.get_spreadsheet().worksheet(title)
+            sheet = self.spreadsheet.worksheet(title)
         except WorksheetNotFound:
-            sheet = self.get_spreadsheet().add_worksheet(title, self.worksheet_rows, self.worksheet_cols)
+            sheet = self.spreadsheet.add_worksheet(title, self.worksheet_rows, self.worksheet_cols)
         return sheet
 
     def _get_ids(self, title: str) -> List[int]:
