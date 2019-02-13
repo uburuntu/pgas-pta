@@ -1,3 +1,5 @@
+from typing import List
+
 import gspread
 from gspread import Worksheet, WorksheetNotFound
 from oauth2client.service_account import ServiceAccountCredentials
@@ -35,25 +37,26 @@ class GSpread:
     def share_access(self, email, role='writer'):
         self.get_spreadsheet().share(email, perm_type='user', role=role)
 
-    def get_sheet(self, title) -> Worksheet:
+    def get_sheet(self, title: str) -> Worksheet:
         try:
             sheet = self.get_spreadsheet().worksheet(title)
         except WorksheetNotFound:
             sheet = self.get_spreadsheet().add_worksheet(title, self.worksheet_rows, self.worksheet_cols)
         return sheet
 
-    def get_main_worksheet(self):
-        if not self.main_worksheet:
-            self.main_worksheet = self.get_sheet('Общий список')
-        return self.main_worksheet
+    def _get_ids(self, title: str) -> List[int]:
+        worksheet = self.get_sheet(title)
+        cells = worksheet.range(f'A2:A{self.worksheet_rows}')
+        return [int(cell.value) for cell in cells if cell.value.isdigit()]
 
-    def get_achievements_worksheet(self):
-        if not self.achievements_worksheet:
-            self.achievements_worksheet = self.get_sheet('Список достижений')
-        return self.achievements_worksheet
+    def get_ids(self) -> List[int]:
+        return self._get_ids('Список ID для выгрузки')
+
+    def get_ids_last_pgas(self) -> List[int]:
+        return self._get_ids('Список ID прошлого семестра')
 
     def fill_main_worksheet(self, data):
-        worksheet = self.get_main_worksheet()
+        worksheet = self.get_sheet('Общий список')
         worksheet.clear()
 
         cols = ['ID', 'ФИО', 'Баллы', 'Тип', 'Тип 273-ФЗ', 'Профиль']
@@ -75,7 +78,7 @@ class GSpread:
         worksheet.update_cells(cells)
 
     def fill_achievements_worksheet(self, data):
-        worksheet = self.get_achievements_worksheet()
+        worksheet = self.get_sheet('Список достижений')
         worksheet.clear()
 
         cols = [
