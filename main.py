@@ -49,7 +49,7 @@ async def main():
 
     section(f'Analyze extensions')
     lmsu.analyze_extensions()
-    quit()
+
     #
     # Google table
     #

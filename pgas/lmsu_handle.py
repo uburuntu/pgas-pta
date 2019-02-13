@@ -47,7 +47,7 @@ class LomonosovMSU:
         name_field = soup.find('h3', {'class': 'achievements-user__name'}) or \
                      soup.find('a', {'class': 'user-block__link user-block__link--logged'})
         user_data = {'name': name_field.text.strip(), 'achievements': []}
-        subsection(f'Processing data for \"{user_data["name"]}\"')
+        subsection(f'Processing user \"{user_data["name"]}\"')
         for achievement in soup.find_all("article", {"class": "achievement"}):
             curr_data = {
                 'title': achievement.find("a", {"class": "achievement__link"}).text.strip(),
@@ -106,7 +106,8 @@ class LomonosovMSU:
         types = AchievementsHandle.AchievementType
         by_types = {e: [] for e in types}
         for achievement in achievements:
-            by_types[AchievementsHandle.achievement_type(achievement['category'])].append(achievement)
+            if achievement['checked']:
+                by_types[AchievementsHandle.achievement_type(achievement['category'])].append(achievement)
 
         def calculate_two_top_degree(sets, achievements):
             scores_by_degrees = [0] * len(sets)
@@ -147,8 +148,9 @@ class LomonosovMSU:
                     if first_num:
                         first_num = int(first_num.group())
                         achievement['score_our'] = achievement['score'] * math.log10(first_num) if first_num > 10 else 1
+                        achievement['comment_our'] += f'Количество участников: {first_num}. '
                     else:
-                        achievement['comment_our'] = 'Warning! В комментарии отсутствует число участников. '
+                        achievement['comment_our'] += 'Warning! В комментарии отсутствует число участников. '
             user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'])
 
     def analyze_extensions(self):
