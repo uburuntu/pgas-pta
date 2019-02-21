@@ -119,7 +119,7 @@ class LomonosovMSU:
                         break
                 else:
                     score_other += int(achievement['score'])
-            return sum(sorted(scores_by_degrees, reverse=True)[2:]) + score_other
+            return sum(sorted(scores_by_degrees, reverse=True)[:2]) + score_other
 
         return {
             types.unknown: sum([x['score'] for x in by_types[types.unknown]]),
