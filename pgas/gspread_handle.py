@@ -64,7 +64,7 @@ class GSpread:
         for columns in cols:
             next(curr).value = columns
 
-        for user_id, user in data.items():
+        for user_id, user in sorted(data.items(), key=lambda x: x[1]['score'], reverse=True):
             next(curr).value = user_id
             next(curr).value = user['name']
             next(curr).value = user['score']
@@ -90,7 +90,7 @@ class GSpread:
         for columns in cols:
             next(curr).value = columns
 
-        for user_id, user in data.items():
+        for user_id, user in sorted(data.items(), key=lambda x: x[1]['name']):
             for achievement in user['achievements']:
                 next(curr).value = user_id
                 next(curr).value = user['name']
