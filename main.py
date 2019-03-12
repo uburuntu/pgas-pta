@@ -42,11 +42,11 @@ async def main():
     section(f'Filtering {len(lmsu.data)} user(s)')
     lmsu.delete_outdated_achievements(date_one_year, date_last_pgas, gspread.get_ids_last_pgas())
 
-    section(f'Postprocess data')
-    lmsu.data_postprocess()
-
     section(f'Dumping users data to file')
     lmsu.dump()
+
+    section(f'Postprocess data')
+    lmsu.data_postprocess()
 
     section(f'Analyze extensions')
     lmsu.analyze_extensions()

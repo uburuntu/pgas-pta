@@ -1,11 +1,11 @@
 import asyncio
 import json
-import math
 import re
 from collections import Counter
 from datetime import datetime
 
 import aiohttp
+import math
 from bs4 import BeautifulSoup
 
 from pgas.achievements_handle import AchievementsHandle
@@ -106,8 +106,8 @@ class LomonosovMSU:
         types = AchievementsHandle.AchievementType
         by_types = {e: [] for e in types}
         for achievement in achievements:
-            if achievement['checked']:
-                by_types[AchievementsHandle.achievement_type(achievement['category'])].append(achievement)
+            #if achievement['checked']:
+            by_types[AchievementsHandle.achievement_type(achievement['category'])].append(achievement)
 
         def calculate_two_top_degree(sets, achievements):
             scores_by_degrees = [0] * len(sets)
