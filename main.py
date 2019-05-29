@@ -38,7 +38,7 @@ async def main():
             section(f'Collecting {len(lmsu.data)} user(s) achievements')
             await lmsu.scrap_achievements()
         finally:
-            await lmsu.session.close()
+            await lmsu.close()
 
     section(f'Filtering {len(lmsu.data)} user(s)')
     lmsu.delete_outdated_achievements(date_one_year, date_last_pgas, gspread.get_ids_last_pgas())

@@ -3,6 +3,7 @@ import json
 import re
 from collections import Counter
 from datetime import datetime
+from typing import Optional
 
 import aiohttp
 import math
@@ -17,7 +18,17 @@ class LomonosovMSU:
 
     def __init__(self):
         self.data = {}
-        self.session: aiohttp.ClientSession = None
+        self._session: Optional[aiohttp.ClientSession] = None
+
+    @property
+    def session(self) -> aiohttp.ClientSession:
+        if self._session is None:
+            self._session = aiohttp.ClientSession()
+        return self._session
+
+    async def close(self):
+        if self._session is not None:
+            await self.session.close()
 
     def load(self, filename='data_dump.json'):
         with open(filename, 'r', encoding='utf-8') as file:
@@ -32,7 +43,6 @@ class LomonosovMSU:
             return await response.read()
 
     async def authorization_on_msu(self, username, password):
-        self.session = aiohttp.ClientSession()
         login_url = f'{self.lmsu_url}/rus/login'
         login_page = await self.request(login_url)
         csrf_token = BeautifulSoup(login_page, features='lxml').find('input', {'name': '_csrf_token'})['value']
