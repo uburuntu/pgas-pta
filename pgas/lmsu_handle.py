@@ -10,14 +10,16 @@ import math
 from bs4 import BeautifulSoup
 
 from pgas.achievements_handle import AchievementsHandle
-from pgas.utils import subsection
+from pgas.utils import subsection, is_non_zero_file
 
 
 class LomonosovMSU:
     lmsu_url = 'https://lomonosov-msu.ru'
 
-    def __init__(self):
+    def __init__(self, filename='lmsu_dump.json'):
         self.data = {}
+        self.filename = filename
+
         self._session: Optional[aiohttp.ClientSession] = None
 
     @property
@@ -30,12 +32,15 @@ class LomonosovMSU:
         if self._session is not None:
             await self.session.close()
 
-    def load(self, filename='data_dump.json'):
-        with open(filename, 'r', encoding='utf-8') as file:
+    def dump_exist(self, filename: str = None):
+        return is_non_zero_file(filename or self.filename)
+
+    def load(self, filename: str = None):
+        with open(filename or self.filename, 'r', encoding='utf-8') as file:
             self.data = json.load(file)
 
-    def dump(self, filename='data_dump.json'):
-        with open(filename, 'w', encoding='utf-8') as file:
+    def dump(self, filename: str = None):
+        with open(filename or self.filename, 'w', encoding='utf-8') as file:
             json.dump(self.data, file, indent=True, ensure_ascii=False)
 
     async def request(self, url, method='GET', data=None, headers=None):
@@ -112,12 +117,12 @@ class LomonosovMSU:
         subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
 
     @staticmethod
-    def calculate_scores(achievements):
+    def calculate_scores(achievements, score_with_unchecked):
         types = AchievementsHandle.AchievementType
         by_types = {e: [] for e in types}
         for achievement in achievements:
-            #if achievement['checked']:
-            by_types[AchievementsHandle.achievement_type(achievement['category'])].append(achievement)
+            if score_with_unchecked or achievement['checked']:
+                by_types[AchievementsHandle.achievement_type(achievement['category'])].append(achievement)
 
         def calculate_two_top_degree(sets, achievements):
             scores_by_degrees = [0] * len(sets)
@@ -140,12 +145,12 @@ class LomonosovMSU:
             types.sport: calculate_two_top_degree(AchievementsHandle.sport_by_degrees, by_types[types.sport]),
         }
 
-    def calculate_score_and_type(self, achievements):
-        scores = self.calculate_scores(achievements)
+    def calculate_score_and_type(self, achievements, score_with_unchecked):
+        scores = self.calculate_scores(achievements, score_with_unchecked)
         sum_score, type = sum(scores.values()), max(scores, key=scores.get)
         return sum_score, type.value, AchievementsHandle.type_as_in_273_federal_law(type, sum_score)
 
-    def data_postprocess(self):
+    def data_postprocess(self, score_with_unchecked=True):
         for user_id, user in self.data.items():
             user_name = user['name'].split()
             user['name'] = f'{user_name[2]} {user_name[0]} {user_name[1]}' if len(user_name) == 3 else f'{user_name[1]} {user_name[0]}'
@@ -161,7 +166,7 @@ class LomonosovMSU:
                         achievement['comment_our'] += f'Количество участников: {first_num}. '
                     else:
                         achievement['comment_our'] += 'Warning! В комментарии отсутствует число участников. '
-            user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'])
+            user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'], score_with_unchecked)
 
     def analyze_extensions(self):
         extensions = []

@@ -11,20 +11,22 @@ async def main():
     #
     # Script arguments
     #
-    lmsu_data_from_file = False
     date_one_year = datetime(2018, 5, 23)
     date_last_pgas = datetime(2019, 2, 14)
 
-    google_spreadsheet = 'https://docs.google.com/spreadsheets/d/1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc'
+    google_spreadsheet_link = 'https://docs.google.com/spreadsheets/d/1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc'
     google_key_filename = 'key.json'
+
+    force_update_achievements = False
+    count_score_with_unchecked_achievements = True
 
     #
     # MSU
     #
     lmsu = LomonosovMSU()
-    gspread = GSpread(google_key_filename, google_spreadsheet)
+    gspread = GSpread(google_key_filename, google_spreadsheet_link)
 
-    if lmsu_data_from_file:
+    if lmsu.dump_exist() and not force_update_achievements:
         section('Loading data from file')
         lmsu.load()
     else:
@@ -47,7 +49,7 @@ async def main():
     lmsu.dump()
 
     section(f'Postprocess data')
-    lmsu.data_postprocess()
+    lmsu.data_postprocess(count_score_with_unchecked_achievements)
 
     section(f'Analyze extensions')
     lmsu.analyze_extensions()

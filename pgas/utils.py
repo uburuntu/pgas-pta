@@ -1,6 +1,11 @@
+import os
 from datetime import datetime
 
 from gspread.utils import rowcol_to_a1
+
+
+def is_non_zero_file(file_path):
+    return os.path.isfile(file_path) and os.path.getsize(file_path) > 0
 
 
 def range_grid(cell_start, cell_end):

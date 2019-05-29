@@ -28,11 +28,12 @@
 1. Ввод логина и пароля аккаунта с редакторскими правами для сети Ломоносов: `passwords.py`
 1. Получение `key.json` для авторизации в Google: https://console.developers.google.com
 1. Выставление аргументов в `main.py`:
-   * `lmsu_data_from_file` (False для первого запуска на этой машине, True для последующих)
    * `date_one_year` (дата, с которой принимаются достижения в этом распределении)
    * `date_last_pgas` (дата, по которую принимались достижения в прошлом распределении)
-   * `google_spreadsheet` (ссылка на таблицу для выгрузки результатов)
+   * `google_spreadsheet_link` (ссылка на таблицу для выгрузки результатов)
    * `google_key_filename` (путь к key.json для авторизации)
+   * `force_update_achievements` (True для обновления достижений с портала, иначе использует предыдущие запуски)
+   * `count_score_with_unchecked_achievements` (True для учета всех достижений, False для учета только проверенных)
 1. Настроить в таблице [pgas-pta](https://docs.google.com/spreadsheets/d/10zX0UM1x6YeU5vj1DuLR0RtHF3_Zas7No1jJSu8gOd8/edit#gid=0) доступ к таблице анкеты текущего распределения  
 1. Запуск скрипта: `python main.py`
-1. Результаты смотрим по ссылке в `google_spreadsheet`
+1. Результаты смотрим по ссылке в `google_spreadsheet_link`
