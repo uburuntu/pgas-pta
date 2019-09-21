@@ -71,6 +71,7 @@ class LomonosovMSU:
                 'checked': bool(achievement.find("input", {"checked": "checked"})),
                 'url': self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href'],
                 'date': '',
+                'upload_date': '',
                 'file': '',
                 'comment': '',
                 'comment_our': '',
