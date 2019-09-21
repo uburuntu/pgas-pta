@@ -71,7 +71,7 @@ class GSpread:
             next(curr).value = user['type']
             next(curr).value = user['type_273']
             next(curr).value = user['url']
-            next(curr).value = user.get('comment', '')
+            next(curr).value = user['comment']
 
         worksheet.update_cells(cells)
 
@@ -81,7 +81,7 @@ class GSpread:
 
         cols = [
             'ID', 'ФИО', 'Тип', 'Категория', 'Название',
-            'Балл', 'Дата получения', 'Проверено', 'Комментарий', 'Наш комментарий',
+            'Балл', 'Дата получения', 'Обращение от', 'Проверено', 'Комментарий', 'Наш комментарий',
             'URL достижения', 'URL подтверждения',
         ]
         row_n, col_n = sum([len(user['achievements']) for user in data.values()]) + 1, len(cols)
@@ -100,6 +100,7 @@ class GSpread:
                 next(curr).value = achievement['title']
                 next(curr).value = achievement.get('score_our', achievement['score'])
                 next(curr).value = achievement['date']
+                next(curr).value = achievement['date_upload']
                 next(curr).value = achievement['checked']
                 next(curr).value = achievement['comment']
                 next(curr).value = achievement['comment_our']
