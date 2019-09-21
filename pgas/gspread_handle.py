@@ -71,7 +71,7 @@ class GSpread:
             next(curr).value = user['type']
             next(curr).value = user['type_273']
             next(curr).value = user['url']
-            next(curr).value = user.get('comment', '')
+            next(curr).value = user['comment']
 
         worksheet.update_cells(cells)
 
@@ -100,7 +100,7 @@ class GSpread:
                 next(curr).value = achievement['title']
                 next(curr).value = achievement.get('score_our', achievement['score'])
                 next(curr).value = achievement['date']
-                next(curr).value = achievement['upload_date']
+                next(curr).value = achievement['date_upload']
                 next(curr).value = achievement['checked']
                 next(curr).value = achievement['comment']
                 next(curr).value = achievement['comment_our']

@@ -61,7 +61,11 @@ class LomonosovMSU:
         soup = BeautifulSoup(response, features="lxml")
         name_field = soup.find('h3', {'class': 'achievements-user__name'}) or \
                      soup.find('a', {'class': 'user-block__link user-block__link--logged'})
-        user_data = {'name': name_field.text.strip(), 'achievements': []}
+        user_data = {
+            'name': name_field.text.strip(),
+            'comment': '',
+            'achievements': [],
+        }
         subsection(f'Processing user \"{user_data["name"]}\"')
         for achievement in soup.find_all("article", {"class": "achievement"}):
             curr_data = {
@@ -71,7 +75,7 @@ class LomonosovMSU:
                 'checked': bool(achievement.find("input", {"checked": "checked"})),
                 'url': self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href'],
                 'date': '',
-                'upload_date': '',
+                'date_upload': '',
                 'file': '',
                 'comment': '',
                 'comment_our': '',
@@ -91,7 +95,7 @@ class LomonosovMSU:
             if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                 achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
             if row.find("div", {"class": "request__row-title"}).text.strip() == 'Обращение от':
-                achievement['upload_date'] = row.find("div", {"class": "request__row-info"}).text.strip()
+                achievement['date_upload'] = row.find("div", {"class": "request__row-info"}).text.strip()
             if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дополнительно':
                 achievement['comment'] = row.find("div", {"class": "request__row-info"}).text.strip()
         file = soup.find("a", {"class": "file-list__file-name"})
@@ -112,12 +116,13 @@ class LomonosovMSU:
             count_removed = 0
             for achievement in achievements[:]:
                 date = datetime.strptime(achievement['date'], '%d.%m.%Y')
-                upload_date = datetime.strptime(achievement['date'], '%d.%m.%Y')
+                date_upload = datetime.strptime(achievement['date_upload'], '%d.%m.%Y')
                 if (date <= date_last_pgas and user_id in ids_last_pgas) or (date <= date_one_year):
                     achievements.remove(achievement)
                     count_removed += 1
-                    if (upload_date > date_last_pgas and user_id in ids_last_pgas) or (upload_date > date_one_year and user_id not in ids_last_pgas):
-                        user['comment'] = f'Дата достижения вне зачетного диапазона, дата обращения в зачетном диапазоне'
+                    if (date_upload > date_last_pgas and user_id in ids_last_pgas) or (
+                            date_upload > date_one_year and user_id not in ids_last_pgas):
+                        user['comment'] += f'— Дата достижения вне зачетного диапазона, дата обращения в зачетном диапазоне.\n'
             if count_removed > 0:
                 subsection(f'Removed {count_removed:>2} achievements for \"{data[user_id]["name"]}\"')
         subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
@@ -173,10 +178,7 @@ class LomonosovMSU:
                             achievement['comment_our'] += f'Количество участников: {first_num}.'
                         else:
                             achievement['comment_our'] += f'Warning! В комментарии отсутствует число участников.'
-                            if user.get('comment') is None:
-                                user['comment'] = f'Проверить количество участников в соревнованиях!'
-                            else:
-                                user['comment'] += f'\nПроверить количество участников в соревнованиях!'
+                            user['comment'] += f'— Проверить количество участников в соревнованиях.\n'
             user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'], score_with_unchecked)
 
     def analyze_extensions(self):
