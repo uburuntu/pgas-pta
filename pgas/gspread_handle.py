@@ -56,7 +56,7 @@ class GSpread:
         worksheet = self.get_sheet('Общий список')
         worksheet.clear()
 
-        cols = ['ID', 'ФИО', 'Баллы', 'Тип', 'Тип 273-ФЗ', 'Профиль']
+        cols = ['ID', 'ФИО', 'Баллы', 'Тип', 'Тип 273-ФЗ', 'Профиль', 'Комментарий']
         row_n, col_n = len(data) + 1, len(cols)
         cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
         curr = iter(cells)
@@ -71,6 +71,7 @@ class GSpread:
             next(curr).value = user['type']
             next(curr).value = user['type_273']
             next(curr).value = user['url']
+            next(curr).value = user.get('comment', '')
 
         worksheet.update_cells(cells)
 

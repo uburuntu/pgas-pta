@@ -89,6 +89,8 @@ class LomonosovMSU:
         for row in soup.find_all("div", {"class": "request__row"}):
             if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                 achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
+            if row.find("div", {"class": "request__row-title"}).text.strip() == 'Обращение от':
+                achievement['upload_date'] = row.find("div", {"class": "request__row-info"}).text.strip()
             if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дополнительно':
                 achievement['comment'] = row.find("div", {"class": "request__row-info"}).text.strip()
         file = soup.find("a", {"class": "file-list__file-name"})
@@ -109,9 +111,12 @@ class LomonosovMSU:
             count_removed = 0
             for achievement in achievements[:]:
                 date = datetime.strptime(achievement['date'], '%d.%m.%Y')
-                if (date < date_last_pgas and user_id in ids_last_pgas) or (date < date_one_year):
+                upload_date = datetime.strptime(achievement['date'], '%d.%m.%Y')
+                if (date <= date_last_pgas and user_id in ids_last_pgas) or (date <= date_one_year):
                     achievements.remove(achievement)
                     count_removed += 1
+                    if (upload_date > date_last_pgas and user_id in ids_last_pgas) or (upload_date > date_one_year and user_id not in ids_last_pgas):
+                        user['comment'] = f'Дата достижения вне зачетного диапазона, дата обращения в зачетном диапазоне'
             if count_removed > 0:
                 subsection(f'Removed {count_removed:>2} achievements for \"{data[user_id]["name"]}\"')
         subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
@@ -159,13 +164,18 @@ class LomonosovMSU:
                 type = AchievementsHandle.achievement_type(achievement['category'])
                 achievement['type'] = type.value
                 if type == AchievementsHandle.AchievementType.sport:
-                    first_num = re.search(r'\d+', achievement['comment'])
-                    if first_num:
-                        first_num = int(first_num.group())
-                        achievement['score_our'] = achievement['score'] * math.log10(first_num) if first_num > 10 else 1
-                        achievement['comment_our'] += f'Количество участников: {first_num}. '
-                    else:
-                        achievement['comment_our'] += 'Warning! В комментарии отсутствует число участников. '
+                    if 'Диплом' in achievement['category']:
+                        first_num = re.search(r'\d+', achievement['comment'])
+                        if first_num:
+                            first_num = int(first_num.group())
+                            achievement['score_our'] = achievement['score'] * math.log10(first_num) if first_num > 10 else 1
+                            achievement['comment_our'] += f'Количество участников: {first_num}.'
+                        else:
+                            achievement['comment_our'] += f'Warning! В комментарии отсутствует число участников.'
+                            if user.get('comment') is None:
+                                user['comment'] = f'Проверить количество участников в соревнованиях!'
+                            else:
+                                user['comment'] += f'\nПроверить количество участников в соревнованиях!'
             user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'], score_with_unchecked)
 
     def analyze_extensions(self):
