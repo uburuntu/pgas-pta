@@ -12,7 +12,10 @@ async def main():
     # Script arguments
     #
     date_one_year = datetime(2018, 6, 30)
-    date_last_pgas = datetime(2019, 1, 31)
+    date_last_pgas = datetime(2019, 2, 14)
+    date_pre_last_pgas = datetime(2018, 9, 14)
+    
+    amount_scholarships = 90
 
     google_spreadsheet_link = 'https://docs.google.com/spreadsheets/d/1Ay_o-48R0mCPBQGr1FLlp1gM_UVskanLViROAXG-LKc'
     google_key_filename = 'key.json'
@@ -62,6 +65,9 @@ async def main():
 
     section('Filling achievements with our data')
     gspread.fill_achievements_worksheet(lmsu.data)
+    
+    section('Filling pretendents id worksheet with our data')
+    gspread.fill_ids_last_pgas_worksheet(lmsu.data, amount_scholarships)
 
     section('The End!')
 

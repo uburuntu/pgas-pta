@@ -108,3 +108,21 @@ class GSpread:
                 next(curr).value = achievement['file']
 
         worksheet.update_cells(cells)
+        
+    def fill_ids_last_pgas_worksheet(self, data, amount_scholarships):
+        worksheet = self.get_sheet('Список ID стипендиатов этого семестра')
+        worksheet.clear()
+
+        cols = ['ID', 'ФИО']
+        row_n, col_n = len(data) + 1, len(cols)
+        cells = worksheet.range(range_grid((1, 1), (row_n, col_n)))
+        curr = iter(cells)
+
+        for columns in cols:
+            next(curr).value = columns
+
+        for user_id, user in sorted(data.items(), key=lambda x: x[1]['score'], reverse=True)[:amount_scholarships]:
+            next(curr).value = user_id
+            next(curr).value = user['name']
+
+        worksheet.update_cells(cells)
