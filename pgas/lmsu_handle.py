@@ -159,7 +159,7 @@ class LomonosovMSU:
     def calculate_score_and_type(self, achievements, score_with_unchecked):
         scores = self.calculate_scores(achievements, score_with_unchecked)
         sum_score, type = sum(scores.values()), max(scores, key=scores.get)
-        return sum_score, type.value, AchievementsHandle.type_as_in_273_federal_law(type, sum_score)
+        return scores, sum_score, type.value, AchievementsHandle.type_as_in_273_federal_law(type, sum_score)
 
     def data_postprocess(self, score_with_unchecked=True):
         for user_id, user in self.data.items():
@@ -179,7 +179,7 @@ class LomonosovMSU:
                         else:
                             achievement['comment_our'] += f'Warning! В комментарии отсутствует число участников.'
                             user['comment'] += f'— Проверить количество участников в соревнованиях.\n'
-            user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'], score_with_unchecked)
+            user['score_by_types'], user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'], score_with_unchecked)
 
     def analyze_extensions(self):
         extensions = []
