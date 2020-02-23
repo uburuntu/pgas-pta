@@ -169,7 +169,7 @@ class LomonosovMSU:
             for achievement in user['achievements']:
                 type = AchievementsHandle.achievement_type(achievement['category'])
                 achievement['type'] = type.value
-                if type == AchievementsHandle.AchievementType.sport:
+                if type == AchievementsHandle.AchievementType.sport or type == AchievementsHandle.AchievementType.culture:
                     if 'Диплом' in achievement['category']:
                         first_num = re.search(r'\d+', achievement['comment'])
                         if first_num:
