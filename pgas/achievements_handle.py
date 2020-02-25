@@ -27,7 +27,12 @@ class AchievementsHandle:
     @staticmethod
     def type_as_in_273_federal_law(type, score):
         types = AchievementsHandle.AchievementType
-        subtypes = ['а', 'б', 'в'][type == types.education:]
+        if type == types.education:
+            subtypes = ['б', 'в']
+        elif type == types.social:
+            subtypes = ['а', 'б']
+        else:
+            subtypes = ['а', 'б', 'в']
         return types.type_273(type) + (subtypes[score % len(subtypes)] if type != types.unknown else '')
 
     @staticmethod
