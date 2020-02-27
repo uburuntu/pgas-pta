@@ -61,7 +61,11 @@ class LomonosovMSU:
         soup = BeautifulSoup(response, features="lxml")
         name_field = soup.find('h3', {'class': 'achievements-user__name'}) or \
                      soup.find('a', {'class': 'user-block__link user-block__link--logged'})
-        user_data = {'name': name_field.text.strip(), 'achievements': []}
+        user_data = {
+            'name': name_field.text.strip(),
+            'comment': '',
+            'achievements': [],
+        }
         subsection(f'Processing user \"{user_data["name"]}\"')
         for achievement in soup.find_all("article", {"class": "achievement"}):
             curr_data = {
@@ -71,6 +75,7 @@ class LomonosovMSU:
                 'checked': bool(achievement.find("input", {"checked": "checked"})),
                 'url': self.lmsu_url + achievement.find("a", {"class": "achievement__link"})['href'],
                 'date': '',
+                'date_upload': '',
                 'file': '',
                 'comment': '',
                 'comment_our': '',
@@ -89,6 +94,8 @@ class LomonosovMSU:
         for row in soup.find_all("div", {"class": "request__row"}):
             if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дата получения':
                 achievement['date'] = row.find("div", {"class": "request__row-info"}).text.strip()
+            if row.find("div", {"class": "request__row-title"}).text.strip() == 'Обращение от':
+                achievement['date_upload'] = row.find("div", {"class": "request__row-info"}).text.strip()
             if row.find("div", {"class": "request__row-title"}).text.strip() == 'Дополнительно':
                 achievement['comment'] = row.find("div", {"class": "request__row-info"}).text.strip()
         file = soup.find("a", {"class": "file-list__file-name"})
@@ -109,9 +116,13 @@ class LomonosovMSU:
             count_removed = 0
             for achievement in achievements[:]:
                 date = datetime.strptime(achievement['date'], '%d.%m.%Y')
-                if (date < date_last_pgas and user_id in ids_last_pgas) or (date < date_one_year):
+                date_upload = datetime.strptime(achievement['date_upload'], '%d.%m.%Y')
+                if (date <= date_last_pgas and user_id in ids_last_pgas) or (date <= date_one_year):
                     achievements.remove(achievement)
                     count_removed += 1
+                    if (date_upload > date_last_pgas and user_id in ids_last_pgas) or (
+                            date_upload > date_one_year and user_id not in ids_last_pgas):
+                        user['comment'] += f'— Дата достижения вне зачетного диапазона, дата обращения в зачетном диапазоне.\n'
             if count_removed > 0:
                 subsection(f'Removed {count_removed:>2} achievements for \"{data[user_id]["name"]}\"')
         subsection(f'Total achievements left: {sum([len(user["achievements"]) for user in data.values()])}')
@@ -148,7 +159,7 @@ class LomonosovMSU:
     def calculate_score_and_type(self, achievements, score_with_unchecked):
         scores = self.calculate_scores(achievements, score_with_unchecked)
         sum_score, type = sum(scores.values()), max(scores, key=scores.get)
-        return sum_score, type.value, AchievementsHandle.type_as_in_273_federal_law(type, sum_score)
+        return scores, sum_score, type.value, AchievementsHandle.type_as_in_273_federal_law(type, sum_score)
 
     def data_postprocess(self, score_with_unchecked=True):
         for user_id, user in self.data.items():
@@ -158,15 +169,17 @@ class LomonosovMSU:
             for achievement in user['achievements']:
                 type = AchievementsHandle.achievement_type(achievement['category'])
                 achievement['type'] = type.value
-                if type == AchievementsHandle.AchievementType.sport:
-                    first_num = re.search(r'\d+', achievement['comment'])
-                    if first_num:
-                        first_num = int(first_num.group())
-                        achievement['score_our'] = achievement['score'] * math.log10(first_num) if first_num > 10 else 1
-                        achievement['comment_our'] += f'Количество участников: {first_num}. '
-                    else:
-                        achievement['comment_our'] += 'Warning! В комментарии отсутствует число участников. '
-            user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'], score_with_unchecked)
+                if type == AchievementsHandle.AchievementType.sport or type == AchievementsHandle.AchievementType.culture:
+                    if 'Диплом' in achievement['category']:
+                        first_num = re.search(r'\d+', achievement['comment'])
+                        if first_num:
+                            first_num = int(first_num.group())
+                            achievement['score_our'] = achievement['score'] * math.log10(first_num) if first_num > 10 else 1
+                            achievement['comment_our'] += f'Количество участников: {first_num}.'
+                        else:
+                            achievement['comment_our'] += f'Warning! В комментарии отсутствует число участников.'
+                            user['comment'] += f'— Проверить количество участников в соревнованиях.\n'
+            user['score_by_types'], user['score'], user['type'], user['type_273'] = self.calculate_score_and_type(user['achievements'], score_with_unchecked)
 
     def analyze_extensions(self):
         extensions = []
